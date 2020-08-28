@@ -37,6 +37,10 @@ h1, h2, h3, p {
   font-family: $primary-font;
 }
 
+body {
+  background: $kanban-background;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -283,5 +287,30 @@ h1, h2, h3, p {
     margin-left: auto;
     margin-right: auto;
   }
+
+}
+
+@media only screen  
+and (max-device-width : 1024px) {
+  .container {
+    .kanban-container {
+      width: max-content;
+      height: max-content;
+
+      .kanban-structure {
+        width: 100%;
+        height: 100%;
+        display: grid;
+        grid-template-columns: auto;
+        grid-template-rows: auto max-content;
+        
+        .buttons-container {
+          padding: 25px;
+        }
+      }
+    }    
+  }
+
+
 
 }
