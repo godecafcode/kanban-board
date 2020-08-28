@@ -1,0 +1,14 @@
+{
+  "name": "kanban-board",
+  "version": "1.0.0",
+  "description": "Kanban-Board - agile project management tool designed to help visualize work, limit work-in-progress, and maximize efficiency",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Maximilian Olson",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
