@@ -140,6 +140,7 @@ body {
                 border-radius: 5px;
                 // cursor: move;
                 background: #FCFCFC;
+                border: 1px solid #eeeeee;
 
                 .item-header {
                   height: 100%;
@@ -167,10 +168,14 @@ body {
                     margin-right: auto;
                   }
 
-                  #reload {
+                  .edit {
                     color: #DBDBDB;
                     cursor: pointer;
                   }
+                }
+
+                .edit-form {
+                  display: none;
                 }
 
                 .item-text {
@@ -185,6 +190,34 @@ body {
                 }
 
                 form {
+                  .edit-grid {
+                    display: grid;
+                    grid-template-columns: auto 40px;
+                    align-items: center;
+
+                    button {
+                      width: 25px;
+                      height: 25px;
+                    }
+                    .exit-icon {
+                      width: 25px;
+                      height: 25px;
+                      color: rgb(255, 255, 255);
+                    }
+
+                    .check {
+                      background: #94E5B3;
+                      border-radius: 5px;
+                    }
+
+                    .undo {
+                      background: #e59494;
+                      border-radius: 5px;
+                    }
+                    .undo:focus {
+                      outline: none;
+                    }
+                  }
                   #kanban-input {
                     background: rgb(240, 240, 240);
                     width: max-content;
@@ -192,7 +225,7 @@ body {
                     text-indent: 10px;
                     font-family: $primary-font;
                     caret-color: transparent;
-                    
+                    height: 18px;
                   }
                   
                   #kanban-input:focus {

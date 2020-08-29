@@ -13,32 +13,33 @@ const ListCtrl = (function () {
       {
         id: 0,
         name: 'Work',
+        color: '#94BCE5',
       },
       {
         id: 1,
         name: 'Studies',
+        color: '#94BCE5',
       },
-      
     ],
     selectedList: null,
-  }
+  };
 
   return {
-    getListData: function() {
+    getListData: function () {
       return listData;
     },
 
-    getLists: function() {
+    getLists: function () {
       return listData.lists;
     },
 
     // Get corresponding list color to each kanban
-    getListColor: function(parentList) {
+    getListColor: function (parentList) {
       // Get the last character from parentList.id and parse the number > id
       parentList = parseInt(parentList.id.charAt(parentList.id.length - 1));
       let color = '';
-      listData.lists.forEach(list => {
-        if(list.id === parentList) {
+      listData.lists.forEach((list) => {
+        if (list.id === parentList) {
           color = list.color;
         }
       });
@@ -48,11 +49,11 @@ const ListCtrl = (function () {
 
     constructList: function (listColor) {
       const ID = listData.lists.length;
-      const name = `list-${ID}`
+      const name = `list-${ID}`;
       const color = listColor;
       const list = new List(ID, name, color);
       listData.lists.push(list);
-      console.log(listData.lists)
+      console.log(listData.lists);
       return list;
     },
   };
@@ -69,8 +70,8 @@ const ItemCtrl = (function () {
 
   const kanbanData = {
     kanbans: [
-      {id: 0, parent: 'kanban-0', text: 'Work'},
-      {id: 1, parent: 'kanban-1', text: 'Study'},
+      { id: 0, parent: 'kanban-0', text: 'Work' },
+      { id: 1, parent: 'kanban-1', text: 'Study' },
     ],
     selectedKanban: null,
   };
@@ -84,14 +85,41 @@ const ItemCtrl = (function () {
       return kanbanData.kanbans;
     },
 
-    constructKanban: function(kanbanText, listParentId, correspColor) {
+    getSelectedKanban: function () {
+      return kanbanData.selectedKanban;
+    },
+
+    constructKanban: function (kanbanText, listParentId, correspColor) {
       const ID = kanbanData.kanbans.length;
       const color = correspColor;
-      const newKanban = new Kanban(ID, listParentId, color, kanbanText)
+      const newKanban = new Kanban(ID, listParentId, color, kanbanText);
       kanbanData.kanbans.push(newKanban);
-      console.log(newKanban)
+      console.log(newKanban);
       return newKanban;
-    } 
+    },
+
+    setSelectedKanban: function (kanban) {
+      const kanbanID = parseInt(kanban.id.charAt(kanban.id.length - 1));
+      kanbanData.kanbans.forEach((kanban) => {
+        if (kanban.id === kanbanID) {
+          kanbanData.selectedKanban = kanban;
+        }
+      });
+      return kanbanData.selectedKanban;
+    },
+
+    updateKanban: function(newText) {
+      // Update text at selectedKanban
+      kanbanData.selectedKanban.text = newText;
+
+      // go trough kanbans and check for match with selectedKanban.id then slice index and replace with slected.
+      kanbanData.kanbans.forEach((kanban, index) => {
+        if(kanban.id === kanbanData.selectedKanban.id) {
+          kanbanData.kanbans.splice(index, 1, kanbanData.selectedKanban);
+        }
+      });
+      return kanbanData.selectedKanban;
+    }
   };
 })();
 
@@ -112,21 +140,21 @@ const UICtrl = (function () {
     getSelectors: function () {
       return UISelectors;
     },
-    
-    populateBoard: function(lists) {
+
+    populateBoard: function (lists) {
       const kanbans = ItemCtrl.getKanbans();
       let UIlists = '';
 
-      lists.forEach(list => {
+      lists.forEach((list) => {
         let items = '';
-        kanbans.forEach(kanban => {
+        kanbans.forEach((kanban) => {
           let parent = Number(kanban.parent.charAt(kanban.parent.length - 1));
-          if(parent === list.id) {
+          if (parent === list.id) {
             items += `
             <div id="kanban-demo" class="item misc_spread-md">
             <div class="item-header">
               <span id="item-color" class="col"></span>
-              <i id="reload" class="material-icons col">refresh</i>
+              <i id="edit" class="material-icons col edit">edit</i>
             </div>
             <div class="item-text">
               <p id="text">${kanban.text}</p>
@@ -134,7 +162,7 @@ const UICtrl = (function () {
           </div>
             `;
           }
-        })
+        });
         UIlists += `
         <div id="list-${list.id}" class="list">
         <div class="list-header misc_spread-sm">
@@ -148,12 +176,12 @@ const UICtrl = (function () {
         </div>
       </div>
         `;
-      })
+      });
 
       document.querySelector(UISelectors.board).innerHTML += UIlists;
     },
 
-    UIconstructList: function(newList) {
+    UIconstructList: function (newList) {
       const list = document.createElement('div');
       list.id = `list-${newList.id}`;
       list.className = 'list';
@@ -167,7 +195,6 @@ const UICtrl = (function () {
         <div id="item-1" class="item misc_spread-md">
           <div class="item-header">
             <span id="item-color-demo" class="col" style="background: ${newList.color}"></span>
-            <i id="reload" class="material-icons col">refresh</i>
           </div>
           <form class="form">
             <input type="text" name="" id="kanban-input">
@@ -180,7 +207,7 @@ const UICtrl = (function () {
       document.querySelector(UISelectors.board).insertAdjacentElement('beforeend', list);
     },
 
-    UIconstructEmptyKanban: function(target, correspColor) {
+    UIconstructEmptyKanban: function (target, correspColor) {
       console.log(correspColor);
       const kanban = document.createElement('div');
       kanban.id = `kanban-empty`;
@@ -188,18 +215,16 @@ const UICtrl = (function () {
       kanban.innerHTML = `
       <div class="item-header">
         <span id="item-color" class="col"" style="background: ${correspColor}"></span>
-        <i id="reload" class="material-icons col">refresh</i>
       </div>
       <form class="form">
         <input type="text" name="" id="kanban-input">
       </form>
       `;
 
-
       document.querySelector(`#${target}`).insertAdjacentElement('beforeend', kanban);
     },
 
-    UIconstructKanban: function(demoParent, kanbanObj) {
+    UIconstructKanban: function (demoParent, kanbanObj) {
       demoParent.remove();
       const kanban = document.createElement('div');
       kanban.id = `kanban-${kanbanObj.id}`;
@@ -207,15 +232,50 @@ const UICtrl = (function () {
       kanban.innerHTML = `
       <div class="item-header">
         <span id="item-color" class="col" style="background: ${kanbanObj.color};"></span>
-        <i id="reload" class="material-icons col">refresh</i>
+        <i id="edit_${kanbanObj.id}" class="material-icons col edit">edit</i>
       </div>
-      <div class="item-text">
+      <form class="edit-form edit-form_${kanbanObj.id}">
+      <div class="edit-grid">
+        <input type="text" name="" value="${kanbanObj.text}" id="kanban-input">
+        <button class="edit-button undo"><i id="exit-icon_${kanbanObj.id}" class="material-icons exit-icon">clear</i></button>                        
+      </div>
+     </form>
+      <div id="kanban-text_${kanbanObj.id}" class="item-text">
         <p id="text" class="kanban-text">${kanbanObj.text}</p>
       </div>
       `;
 
-     
       document.querySelector(`#${kanbanObj.parent}`).insertAdjacentElement('beforeend', kanban);
+    },
+
+    UIenterEditState: function (id) {
+      document.querySelector(`#edit_${id}`).style.display = 'none';
+      document.querySelector(`#kanban-text_${id}`).style.display = 'none';
+      document.querySelector(`.edit-form_${id}`).style.display = 'block';
+    },
+
+    UIleaveEditState: function (id) {
+      document.querySelector(`#edit_${id}`).style.display = 'block';
+      document.querySelector(`#kanban-text_${id}`).style.display = 'block';
+      document.querySelector(`.edit-form_${id}`).style.display = 'none';
+    },
+
+    UIupdateKanban: function(kanban, newKanban) {
+      kanban.innerHTML = `
+      <div class="item-header">
+      <span id="item-color" class="col" style="background: ${newKanban.color};"></span>
+      <i id="edit_${newKanban.id}" class="material-icons col edit">edit</i>
+    </div>
+    <form class="edit-form edit-form_${newKanban.id}">
+    <div class="edit-grid">
+      <input type="text" name="" value="${newKanban.text}" id="kanban-input">
+      <button class="edit-button undo"><i id="exit-icon_${newKanban.id}" class="material-icons exit-icon">clear</i></button>                        
+    </div>
+   </form>
+    <div id="kanban-text_${newKanban.id}" class="item-text">
+      <p id="text" class="kanban-text">${newKanban.text}</p>
+    </div>
+      `;
     }
   };
 })();
@@ -233,32 +293,41 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl) {
 
     // Create Kanban
     const forms = document.querySelectorAll(selectors.form);
-    forms.forEach(form => {
-      console.log(form)
+    forms.forEach((form) => {
+      console.log(form);
       form.addEventListener('submit', createKanban);
     });
 
-    // Add Kanban through header button
-    const addKanbanButtons = document.querySelectorAll(selectors.addKanban);
-    addKanbanButtons.forEach(button => {
-      button.addEventListener('click', constructEmptyKanban);
-    })
-
-    // Double click to change kanban text
-    const kanbanText = document.querySelectorAll(selectors.kanbanText);
-    kanbanText.forEach(text => {
-      text.addEventListener('dblclick', changeKanbanText);
-    });
-
+    // purpose: prevent from reassigning every event listener when new elements is being created.
+    document.querySelector(selectors.board).addEventListener('click', determine);
   };
 
-  const constructListColor = function() {
-    const symLet = ['a','b','c','d','e','f',0,1,2,3,4,5,6,7,8,9];
+  //? Add edit state buttons
+  //? Add event listeners for those buttons, both finished and back button
+
+  const determine = function (e) {
+    const id = e.target.id.charAt(e.target.id.length - 1);
+
+    if (e.target.classList.contains('add-kanban')) {
+      constructEmptyKanban(e);
+    } else if (e.target.classList.contains('edit')) {
+      const kanban = e.target.parentNode.parentNode;
+      ItemCtrl.setSelectedKanban(kanban)
+      enterEditState(e, id);
+    } else if (e.target.classList.contains('exit-icon')) {
+      leaveEditState(id);
+    }
+
+    e.preventDefault();
+  };
+
+  const constructListColor = function () {
+    const symLet = ['a', 'b', 'c', 'd', 'e', 'f', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
     let color = `#94`; // always begin with #94 for a consistant color design.
     for (let i = 0; i < 4; i++) {
-      color += symLet[Math.floor(Math.random() * symLet.length)]
+      color += symLet[Math.floor(Math.random() * symLet.length)];
     }
-    return color
+    return color;
   };
 
   const createList = function () {
@@ -269,14 +338,14 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl) {
     loadEventListeners();
   };
 
-  const constructEmptyKanban = function(e) {
+  const constructEmptyKanban = function (e) {
     const target = e.target.parentNode.nextSibling.nextSibling.firstElementChild;
     const listColor = ListCtrl.getListColor(e.target.parentNode.parentNode);
-    console.log(`list color: ${listColor}`) // Check if color is returned properly
+    console.log(`list color: ${listColor}`); // Check if color is returned properly
     UICtrl.UIconstructEmptyKanban(target.id, listColor);
     // re-assign event listeners to newly createn items.
     loadEventListeners();
-  }
+  };
 
   const createKanban = function (e) {
     const kanbanText = e.target.firstElementChild.value;
@@ -287,25 +356,38 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl) {
     // Construct Kanban object
     const kanban = ItemCtrl.constructKanban(kanbanText, listParentId, correspColor);
     // Construct UI Kanban
-    UICtrl.UIconstructKanban(listParent, kanban)
+    UICtrl.UIconstructKanban(listParent, kanban);
     e.preventDefault();
   };
 
-  const changeKanbanText = function(e) {
-    
-  }
+  const enterEditState = function (e, id) {
+    const form = e.target.parentNode.nextSibling.nextSibling;
+    const formClass = form.classList[1];
+    const kanban = form.parentNode;
+    UICtrl.UIenterEditState(id);
+    document.querySelector(`.${formClass}`).addEventListener('submit', (e) => {
+      console.log('test');
+      // e.preventDefault();
+    });
+    // Submit on enter
+    document.addEventListener('keypress', (e) => {
+      if (e.keycode === 13 || e.which === 13) {
+        const newText = form.firstElementChild.firstElementChild.value;
+        const updatedKanban = ItemCtrl.updateKanban(newText);
+        UICtrl.UIupdateKanban(kanban, updatedKanban);
+      }
+    });
+  };
+
+  const leaveEditState = function (id) {
+    UICtrl.UIleaveEditState(id);
+  };
 
   return {
     init: function () {
-
       // Get all lists from ListCtrl.getLists
       const lists = ListCtrl.getLists();
-      UICtrl.populateBoard(lists)
-
-
-
-
-
+      UICtrl.populateBoard(lists);
 
       loadEventListeners();
     },
