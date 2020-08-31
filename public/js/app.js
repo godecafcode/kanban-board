@@ -135,6 +135,66 @@ const ItemCtrl = (function () {
       });
       return selectedKanban;
     },
+
+    getSwitchItems: function(draggable, afterElement) {
+      if(!afterElement) {
+        const draggableID = parseInt(draggable.id.charAt(draggable.id.length - 1));
+        let draggableObj;
+  
+        kanbanData.kanbans.forEach(kanban => {
+          if(kanban.id === draggableID) {
+            draggableObj = kanban;
+          }
+        });
+  
+        return {
+          draggableObj: draggableObj,
+        };
+      } else {
+        const draggableID = parseInt(draggable.id.charAt(draggable.id.length - 1));
+        const afterElementID = parseInt(afterElement.id.charAt(afterElement.id.length - 1));
+        let draggableObj = null;
+        let afterElementObj = null;
+
+        kanbanData.kanbans.forEach(kanban => {
+          if(kanban.id === draggableID) {
+            draggableObj = kanban;
+          } else if(kanban.id === afterElementID) {
+            afterElementObj = kanban;
+          }
+        });
+
+        return {
+          draggableObj: draggableObj,
+          afterElementObj: afterElementObj,
+        };        
+      }
+
+
+    },
+
+    dragSwitch: function(kanbanObj) {
+      if(!kanbanObj.afterElementObj) {
+      const draggableObj = kanbanObj.draggableObj;
+      // console.log(draggableObj)
+
+      kanbanData.kanbans.forEach((kanban, index) => {
+        if(kanban === draggableObj) {
+          kanbanData.kanbans.splice(index, 1);
+          kanbanData.kanbans.push(draggableObj);
+        }
+      });      
+      }
+      const draggableObj = kanbanObj.draggableObj;
+      const afterElementObj = kanbanObj.afterElementObj;
+
+      kanbanData.kanbans.forEach((kanban, index) => {
+        if(kanban === afterElementObj) {
+          kanbanData.kanbans.splice(index, 1, draggableObj);
+          kanbanData.kanbans.splice(draggableObj.id, 1, afterElementObj);
+        }
+      });
+    },
   };
 })();
 
@@ -316,6 +376,7 @@ const UICtrl = (function () {
       ItemCtrl.removeSelectedKanban();
     },
 
+
     toUpperCase: function(string) {
       const char = string.charAt(0).toUpperCase();
       string = char + string.slice(1, string.length)
@@ -424,6 +485,9 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl) {
   };
 
   const makeDraggable = function() {
+    // global variables hack
+    let vars = {};
+
     const draggables = document.querySelectorAll('.item');
     const lists = document.querySelectorAll('.list');
 
@@ -434,14 +498,44 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl) {
 
       draggable.addEventListener('dragend', () => {
         draggable.classList.remove('dragging');
+        ItemCtrl.dragSwitch(vars.kanbanObj);
+        console.log(vars)
       });
     });
 
     lists.forEach(list => {
-      list.addEventListener('dragover', () => {
-        console.log('drag over')
+      list.addEventListener('dragover', e => {
+        e.preventDefault();
+        vars.afterElement = getDragAfterElement(list, e.clientY);
+        const draggable = document.querySelector('.dragging');
+        if(vars.afterElement === null) {
+          list.lastElementChild.firstElementChild.appendChild(draggable);    
+          vars = {};
+          vars.kanbanObj = ItemCtrl.getSwitchItems(draggable, vars.afterElement);
+        } else {
+          list.lastElementChild.firstElementChild.insertBefore(draggable, vars.afterElement);
+          // Replace position
+          vars = {};
+          vars.kanbanObj = ItemCtrl.getSwitchItems(draggable, vars.afterElement);
+
+        }
       })
     });
+
+    function getDragAfterElement(list, y) {
+      const draggableElements = [...list.querySelectorAll('.item:not(.dragging)')];
+
+      return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if(offset < 0 && offset > closest.offset) {
+          return { offset: offset, element: child }
+        } else {
+          return closest;
+        }
+        
+      }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
   };
 
   const enterEditState = function (e, id) {
@@ -489,6 +583,8 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl) {
       UICtrl.populateBoard(lists);
 
       loadEventListeners();
+
+      
     },
   };
 })(ListCtrl, ItemCtrl, UICtrl);
