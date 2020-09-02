@@ -17,15 +17,31 @@
 
             <div class="list">
               <div class="list-header misc_spread-sm">
-                <!-- <h1 style="display: none;">Demo</h1> -->
+               
                   <input type="text" name="" id="add-title" class="add-title" placeholder="Add title">
-                <i class="material-icons add-kanban">add_circle_outline</i>
+                
+                <i class="material-icons head-icon show-more_header">more_horiz</i>
+                <!-- <div class="open-head_container">
+                  <div class="head-icons">
+                    <i class="material-icons head-icon delete-list">delete</i>       
+                    <i class="material-icons head-icon clear-list">clear_all</i>       
+                  </div>
+                </div> -->
+
               </div>
               <div class="list-body misc_spread-sm">
                 <div id="list-body" class="list-body_grid">
                   <div id="item-1" class="item misc_spread-md">
                     <div class="item-header">
                       <span id="item-color-demo" class="col"></span>
+                      <div class="open-edit_container" style="display: none;">
+                        <div class="open-edit">
+                          <i class="material-icons col delete icon">delete</i>
+                          <i class="material-icons col done icon">done</i>
+                          <i class="material-icons col clear icon">clear</i>  
+                        </div>
+                      </div>
+                      <i class="material-icons col icon edit">edit</i>
                     </div>
                     <form class="form">
                       <div class="edit-grid">
@@ -44,14 +60,16 @@
           <div class="buttons-container">
             <div class="buttons cta">
               <button id="add" class="button"><i class="material-icons btn-icon">add</i></button>
-              <button id="toggle-edit" class="button"><i class="material-icons btn-icon_separate">edit</i></button>
-              <button id="toggle-remove" class="button"><i class="material-icons btn-icon">remove</i></button>
+              <!-- <button id="toggle-edit" class="button"><i class="material-icons btn-icon_separate">edit</i></button>
+              <button id="toggle-remove" class="button"><i class="material-icons btn-icon">remove</i></button> -->
             </div>            
           </div>
 
         </div>
       </div>
     </div>
+    <script src="https://unpkg.com/animate-css-grid@1.4.0/dist/main.js"></script>
+    <script src="/js/animateGrid.js"></script>
     <script src="/js/app.js"></script>
   </body>
 </html>

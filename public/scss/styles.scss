@@ -37,6 +37,10 @@ h1, h2, h3, p {
   font-family: $primary-font;
 }
 
+[contenteditable] {
+  outline: 0px solid transparent;
+}
+
 body {
   background: $kanban-background;
 }
@@ -47,6 +51,11 @@ body {
   padding: 0;
   text-decoration: none;
   list-style: none;
+
+  -webkit-user-select: none;  /* Chrome all / Safari all */
+  -moz-user-select: none;     /* Firefox all */
+  -ms-user-select: none;      /* IE 10+ */
+  user-select: none;          /* Likely future */     
 }
 
 .container {
@@ -79,7 +88,6 @@ body {
         .list {
           width: 350px;
           height: max-content;
-          max-height: max-content;
           border-radius: 5px;
           background-color: #fff;
           box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.164);
@@ -97,7 +105,18 @@ body {
             display: flex;
             place-items: center;
             border-radius: 5px 5px 0px 0px;
+            border-bottom: 1px solid #eee;
             background: $kanban-header;
+            
+            .head-icons {
+              display: flex;
+              place-self: center;
+            }
+
+            .title-container {
+              margin-right: auto;
+            }
+
             h1 {
               color: #808080;
               font-size: 18px;
@@ -109,7 +128,16 @@ body {
               color: #a8a8a8;
             }
 
+            .head-icon {
+              color: #a8a8a8;
+              cursor: pointer;
+            }
+            .head-icon:hover {
+              color: #a9a9a9;
+            }
+
             .add-title {
+              display: block;
               background: transparent;
               width: 125px;
               border-radius: 5px;
@@ -145,7 +173,7 @@ body {
             .list-body_grid {
               width: 100%;
               height: max-content;
-              max-height: 410px;
+              max-height: 425px;
               display: grid;
               grid-template-columns: 1fr;
               grid-template-rows: repeat(auto-fit, 95px);
@@ -176,8 +204,9 @@ body {
 
                   #item-color {
                     width: 60px;
-                    height: 10px;
+                    height: 9px;
                     border-radius: 5px;
+                    // border: 1px solid rgb(255, 255, 255);
                     background: $kanban-blue;
                     margin-right: auto;
                   }
@@ -189,9 +218,19 @@ body {
                     background: $kanban-green;
                     margin-right: auto;
                   }
+                  .open-edit_container {
+                    .open-edit {
+                      display: flex;
+                      place-items: center;
+                    }
+                  }
 
-                  .edit {
+                  .icon {
                     color: #DBDBDB;
+                    cursor: pointer;
+                  }
+                  .icon:hover {
+                    color: #d5d5d5;
                     cursor: pointer;
                   }
                 }

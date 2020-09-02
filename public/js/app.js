@@ -1,5 +1,125 @@
 // Storage Controller
 
+const StorageCtrl = (function() {
+  return {
+    //? List Storage
+    storeList: function(list) {
+      let lists;
+      if(localStorage.getItem('lists') === null) {
+        lists = [];
+        lists.push(list);
+        localStorage.setItem('lists', JSON.stringify(lists));
+      } else {
+        lists = JSON.parse(localStorage.getItem('lists'));
+        lists.push(list);
+        localStorage.setItem('lists', JSON.stringify(lists));
+      }
+    },
+
+    storeListTitle: function(target, id) {
+      let lists = JSON.parse(localStorage.getItem('lists'));
+      const ID = parseInt(id);
+
+      lists.forEach(list => {
+        if(list.id === ID) {
+          list.name = target.value;
+        }
+      });
+
+      localStorage.setItem('lists', JSON.stringify(lists));
+    },
+
+    updateListTitle: function(list, newTitle) {
+      let lists = JSON.parse(localStorage.getItem('lists'));
+      const listID = parseInt(list.id.charAt(list.id.length - 1));
+
+      lists.forEach(list => {
+        if(list.id === listID) {
+          list.name = newTitle;
+        }
+      });
+
+      localStorage.setItem('lists', JSON.stringify(lists));
+    },
+
+    getListsFromStorage: function() {
+      let lists;
+      if(localStorage.getItem('lists') === null) {
+        lists = [];
+      } else {
+        lists = JSON.parse(localStorage.getItem('lists'));
+      }
+      return lists;
+    },
+
+    deleteList: function(list) {
+      console.log(list)
+      localStorage.setItem('lists', JSON.stringify(list));
+    },
+
+    //? Kanban Storage
+    storeKanban: function(kanban) {
+      let kanbans;
+      if(localStorage.getItem('kanbans') === null) {
+        kanbans = [];
+        kanbans.push(kanban);
+        localStorage.setItem('kanbans', JSON.stringify(kanbans));
+      } else {
+        kanbans = JSON.parse(localStorage.getItem('kanbans'));
+        kanbans.push(kanban);
+        localStorage.setItem('kanbans', JSON.stringify(kanbans));
+      }
+    },
+
+    getKanbansFromStorage: function() {
+      let kanbans;
+      if(localStorage.getItem('kanbans') === null) {
+        kanbans = [];
+      } else {
+        kanbans = JSON.parse(localStorage.getItem('kanbans'));
+      }
+      return kanbans;
+    },
+    
+    updateKanban: function(updatedKanban) {
+      let kanbans = JSON.parse(localStorage.getItem('kanbans'));
+      
+      // Loop through and find identical IDs
+      kanbans.forEach((kanban, index) => {
+        if(kanban.id === updatedKanban.id) {
+          kanbans.splice(index, 1, updatedKanban);
+        }
+      }); 
+      localStorage.setItem('kanbans', JSON.stringify(kanbans));
+    },
+
+    deleteKanbanFromStorage: function(deletedKanban) {
+      const deletedKanbanID = parseInt(deletedKanban.id.charAt(deletedKanban.id.length - 1));
+      let kanbans = JSON.parse(localStorage.getItem('kanbans'));
+
+      kanbans.forEach((kanban, index) => {
+        if(kanban.id === deletedKanbanID) {
+          kanbans.splice(index, 1);
+        }
+      });
+
+      localStorage.setItem('kanbans', JSON.stringify(kanbans));
+    },
+
+    deleteKanbanFromList: function(kanbans) {
+      localStorage.setItem('kanbans', JSON.stringify(kanbans));
+    },
+
+    dragSwitch: function(positionUpdate) {
+      localStorage.setItem('kanbans', JSON.stringify(positionUpdate));
+    },
+
+    removeDuplicate: function(kanbans) {
+      localStorage.setItem('kanbans', JSON.stringify(kanbans));
+    },
+  }
+})();
+
 // List Controller
 const ListCtrl = (function () {
   const List = function (id, name, color) {
@@ -9,18 +129,7 @@ const ListCtrl = (function () {
   };
 
   const listData = {
-    lists: [
-      // {
-      //   id: 0,
-      //   name: 'Work',
-      //   color: '#94BCE5',
-      // },
-      // {
-      //   id: 1,
-      //   name: 'Studies',
-      //   color: '#94BCE5',
-      // },
-    ],
+    lists: StorageCtrl.getListsFromStorage(),
     selectedList: null,
   };
 
@@ -48,7 +157,12 @@ const ListCtrl = (function () {
     },
 
     constructList: function (listColor) {
-      const ID = listData.lists.length;
+      let ID = listData.lists.length;
+      listData.lists.forEach(list => {
+        if(list.id === ID) {
+          ID++
+        }
+      });
       const name = `list-${ID}`;
       const color = listColor;
       const list = new List(ID, name, color);
@@ -57,16 +171,37 @@ const ListCtrl = (function () {
       return list;
     },
 
-    addListTitle: function(target, id) {
-      console.log(target.value)
+    addListTitle: function (target, id) {
+      console.log(target.value);
       const ID = parseInt(id);
       const lists = listData.lists;
-      lists.forEach(list => {
-        if(list.id === ID) {
+      lists.forEach((list) => {
+        if (list.id === ID) {
           list.name = target.value;
-        };
+        }
       });
     },
+
+    updateListTitle: function(list, newTitle) {
+      const listID = parseInt(list.id.charAt(list.id.length - 1));
+      const lists = listData.lists;
+
+      lists.forEach(list => {
+        if(list.id === listID) {
+          list.name = newTitle;
+        }
+      });
+    },
+
+    deleteList: function(id) {
+      const lists = listData.lists;
+      lists.forEach((list, index) => {
+        if(list.id === id) {
+          lists.splice(index, 1);
+        }
+      });
+      return lists;
+    }
   };
 })();
 
@@ -80,10 +215,7 @@ const ItemCtrl = (function () {
   };
 
   const kanbanData = {
-    kanbans: [
-      // { id: 0, parent: 'kanban-0', text: 'Work' },
-      // { id: 1, parent: 'kanban-1', text: 'Study' },
-    ],
+    kanbans: StorageCtrl.getKanbansFromStorage(),
     selectedKanban: null,
   };
 
@@ -136,17 +268,34 @@ const ItemCtrl = (function () {
       return selectedKanban;
     },
 
-    getSwitchItems: function(draggable, afterElement) {
-      if(!afterElement) {
+    deleteKanban: function() {
+      const kanbans = this.getKanbans();
+      const selectedKanban = this.getSelectedKanban();
+      kanbans.forEach((kanban, index) => {
+        if(kanban.id === selectedKanban.id) {
+          kanbans.splice(index, 1);
+        }
+      });
+    },
+
+    deleteKanbanFromList: function(id) {
+      let kanbans = kanbanData.kanbans;
+
+      const filtered = kanbans.filter(kanban => kanban.parent !== `list-body_${id}`);
+      return filtered;
+    },
+
+    getSwitchItems: function (draggable, afterElement) {
+      if (!afterElement) {
         const draggableID = parseInt(draggable.id.charAt(draggable.id.length - 1));
         let draggableObj;
-  
-        kanbanData.kanbans.forEach(kanban => {
-          if(kanban.id === draggableID) {
+
+        kanbanData.kanbans.forEach((kanban) => {
+          if (kanban.id === draggableID) {
             draggableObj = kanban;
           }
         });
-  
+
         return {
           draggableObj: draggableObj,
         };
@@ -156,10 +305,10 @@ const ItemCtrl = (function () {
         let draggableObj = null;
         let afterElementObj = null;
 
-        kanbanData.kanbans.forEach(kanban => {
-          if(kanban.id === draggableID) {
+        kanbanData.kanbans.forEach((kanban) => {
+          if (kanban.id === draggableID) {
             draggableObj = kanban;
-          } else if(kanban.id === afterElementID) {
+          } else if (kanban.id === afterElementID) {
             afterElementObj = kanban;
           }
         });
@@ -167,33 +316,57 @@ const ItemCtrl = (function () {
         return {
           draggableObj: draggableObj,
           afterElementObj: afterElementObj,
-        };        
+        };
       }
-
-
     },
 
-    dragSwitch: function(kanbanObj) {
-      if(!kanbanObj.afterElementObj) {
-      const draggableObj = kanbanObj.draggableObj;
-      // console.log(draggableObj)
+    dragSwitch: function (kanbanObj, list) {
 
-      kanbanData.kanbans.forEach((kanban, index) => {
-        if(kanban === draggableObj) {
-          kanbanData.kanbans.splice(index, 1);
-          kanbanData.kanbans.push(draggableObj);
-        }
-      });      
+      if (!kanbanObj.afterElementObj || kanbanObj.afterElementObj === undefined) {
+        const draggableObj = kanbanObj.draggableObj;
+
+        kanbanData.kanbans.forEach((kanban, index) => {
+          if (kanban === draggableObj) {
+            kanbanData.kanbans.splice(index, 1);
+            kanbanData.kanbans.push(draggableObj);
+            kanban.parent = list.id;
+          }
+        });
+        
+      } else {
+        const draggableObj = kanbanObj.draggableObj;
+        const afterElementObj = kanbanObj.afterElementObj;
+
+        kanbanData.kanbans.forEach((kanban, index) => {
+          if (kanban === draggableObj) {
+            kanbanData.kanbans.splice(index, 1);
+          }
+        });
+
+        kanbanData.kanbans.forEach((kanban, index) => {
+          if (kanban === afterElementObj) {
+            kanbanData.kanbans.splice(index, 0, draggableObj);
+            draggableObj.parent = afterElementObj.parent;
+          }
+        });
       }
-      const draggableObj = kanbanObj.draggableObj;
-      const afterElementObj = kanbanObj.afterElementObj;
 
-      kanbanData.kanbans.forEach((kanban, index) => {
-        if(kanban === afterElementObj) {
-          kanbanData.kanbans.splice(index, 1, draggableObj);
-          kanbanData.kanbans.splice(draggableObj.id, 1, afterElementObj);
+      return kanbanData.kanbans;
+    },
+
+    removeDuplicate: function () {
+      const kanbans = kanbanData.kanbans;
+
+      const filteredArr = kanbans.reduce((acc, current) => {
+        const x = acc.find((item) => item.id === current.id);
+        if (!x) {
+          return acc.concat([current]);
+        } else {
+          return acc;
         }
-      });
+      }, []);
+
+      return filteredArr;
     },
   };
 })();
@@ -226,23 +399,42 @@ const UICtrl = (function () {
           let parent = Number(kanban.parent.charAt(kanban.parent.length - 1));
           if (parent === list.id) {
             items += `
-            <div id="kanban-demo" class="item misc_spread-md">
+            <div id="kanban_${kanban.id}" class="item misc_spread-md" draggable="true">
             <div class="item-header">
-              <span id="item-color" class="col"></span>
-              <i id="edit" class="material-icons col edit">edit</i>
+            <span id="item-color" class="col" style="background: ${kanban.color};"></span>
+            <div id="open-edit_container__${kanban.id}" class="open-edit_container" style="display: none;">
+            <div class="open-edit">
+              <i id="delete_${kanban.id}" class="material-icons col icon delete">delete</i>
+              <i id="done_${kanban.id}" class="material-icons col icon done">done</i>
+              <i id="clear_${kanban.id}" class="material-icons col icon clear">clear</i>  
             </div>
-            <div class="item-text">
-              <p id="text">${kanban.text}</p>
-            </div>
+          </div>
+          <i id="edit_${kanban.id}" class="material-icons col icon edit">edit</i>
+          </div>
+          <form class="edit-form edit-form_${kanban.id}">
+          <div class="edit-grid">
+            <input type="text" name="" value="${kanban.text}" id="kanban-input_${kanban.id}" class="kanban-input">                     
+          </div>
+         </form>
+          <div id="kanban-text_${kanban.id}" class="item-text">
+            <p id="text" class="kanban-text">${kanban.text}</p>
+          </div>
           </div>
             `;
           }
         });
         UIlists += `
         <div id="list-${list.id}" class="list">
-        <div class="list-header misc_spread-sm">
-          <h1>${list.name}</h1>
+        <div class="list-header misc_spread-sm" style="background: ${list.color}">
+          <h1 id="list-title_${list.id}" class="list-title" contenteditable="true">${list.name}</h1>
           <i class="material-icons add-kanban">add_circle_outline</i>
+          <i id="check_${list.id}" class="material-icons head-icon update-title" style="display: none;">check_circle_outline</i>
+          <div class="open-head_container" style="display: none;">
+          <div class="head-icons">
+            <i id="delete-list_${list.id}" class="material-icons head-icon delete-list">delete</i>       
+            <i id="clear-list_${list.id}" class="material-icons head-icon clear-list">clear_all</i>       
+          </div>
+        </div>
         </div>
         <div class="list-body misc_spread-sm">
           <div id="list-body_${list.id}" class="list-body_grid">
@@ -254,6 +446,7 @@ const UICtrl = (function () {
       });
 
       document.querySelector(UISelectors.board).innerHTML += UIlists;
+      App.AppMakeDraggable();
     },
 
     UIconstructList: function (newList) {
@@ -261,9 +454,16 @@ const UICtrl = (function () {
       list.id = `list-${newList.id}`;
       list.className = 'list';
       list.innerHTML = `
-      <div id="list-header_${newList.id}" class="list-header misc_spread-sm">
+      <div id="list-header_${newList.id}" class="list-header misc_spread-sm" style="background: ${newList.color}">
       <input type="text" name="" id="add-title_${newList.id}" class="add-title" placeholder="Add title">
       <i class="material-icons add-kanban">add_circle_outline</i>
+      <i id="check_${newList.id}" class="material-icons head-icon update-title" style="display: none;">check_circle_outline</i>
+      <div class="open-head_container" style="display: none;">
+      <div class="head-icons">
+        <i id="delete-list_${newList.id}" class="material-icons head-icon delete-list">delete</i>       
+        <i id="clear-list_${newList.id}" class="material-icons head-icon clear-list">clear_all</i>       
+      </div>
+    </div>
     </div>
     <div class="list-body misc_spread-sm">
       <div id="list-body_${newList.id}" class="list-body_grid">
@@ -282,23 +482,23 @@ const UICtrl = (function () {
       document.querySelector(UISelectors.board).insertAdjacentElement('beforeend', list);
     },
 
-    UIaddListTitle: function(target, id) {
+    UIaddListTitle: function (target, id) {
       const lists = document.querySelectorAll('.list');
-      lists.forEach(list => {
-        if(list.id.charAt(list.id.length - 1) === id) {
-        list.firstElementChild.firstElementChild.remove();
+      lists.forEach((list) => {
+        if (list.id.charAt(list.id.length - 1) === id) {
+          list.firstElementChild.firstElementChild.remove();
           const h1 = document.createElement('h1');
           h1.id = `list-title_${id}`;
           h1.className = 'list-title';
           h1.textContent = this.toUpperCase(target.value);
 
           const parentNode = document.querySelector(`#list-header_${id}`);
-          const referenceNode = parentNode.lastElementChild;
-
+          const referenceNode = parentNode.firstElementChild;
+          console.log(parentNode);
+          console.log(referenceNode);
           parentNode.insertBefore(h1, referenceNode);
-          
         }
-      })
+      });
     },
 
     UIconstructEmptyKanban: function (target, correspColor) {
@@ -319,6 +519,8 @@ const UICtrl = (function () {
     },
 
     UIconstructKanban: function (demoParent, kanbanObj) {
+      // console.log('OBJECT BELOW')
+      // console.log(kanbanObj)
       demoParent.remove();
       // ItemCtrl.removeSelectedKanban();
       const kanban = document.createElement('div');
@@ -328,12 +530,18 @@ const UICtrl = (function () {
       kanban.innerHTML = `
       <div class="item-header">
         <span id="item-color" class="col" style="background: ${kanbanObj.color};"></span>
-        <i id="edit_${kanbanObj.id}" class="material-icons col edit">edit</i>
+        <div id="open-edit_container__${kanbanObj.id}" class="open-edit_container" style="display: none;">
+        <div class="open-edit">
+          <i id="delete_${kanbanObj.id}" class="material-icons col icon delete">delete</i>
+          <i id="done_${kanbanObj.id}" class="material-icons col icon done">done</i>
+          <i id="clear_${kanbanObj.id}" class="material-icons col icon clear">clear</i>  
+        </div>
+      </div>
+      <i id="edit_${kanbanObj.id}" class="material-icons col icon edit">edit</i>
       </div>
       <form class="edit-form edit-form_${kanbanObj.id}">
       <div class="edit-grid">
-        <input type="text" name="" value="${kanbanObj.text}" id="kanban-input_${kanbanObj.id}" class="kanban-input">
-        <button class="edit-button undo"><i id="exit-icon_${kanbanObj.id}" class="material-icons exit-icon">clear</i></button>                        
+        <input type="text" name="" value="${kanbanObj.text}" id="kanban-input_${kanbanObj.id}" class="kanban-input">                     
       </div>
      </form>
       <div id="kanban-text_${kanbanObj.id}" class="item-text">
@@ -345,12 +553,20 @@ const UICtrl = (function () {
     },
 
     UIenterEditState: function (id) {
+      // Show edit menu
+      document.querySelector(`#open-edit_container__${id}`).style.display = 'block';
+
+      // Hide pen when in edit state
       document.querySelector(`#edit_${id}`).style.display = 'none';
       document.querySelector(`#kanban-text_${id}`).style.display = 'none';
       document.querySelector(`.edit-form_${id}`).style.display = 'block';
     },
 
     UIleaveEditState: function (id) {
+      // Hide edit menu
+      document.querySelector(`#open-edit_container__${id}`).style.display = 'none';
+
+      // Show pen when not in edit state
       document.querySelector(`#edit_${id}`).style.display = 'block';
       document.querySelector(`#kanban-text_${id}`).style.display = 'block';
       document.querySelector(`.edit-form_${id}`).style.display = 'none';
@@ -360,12 +576,18 @@ const UICtrl = (function () {
       kanban.innerHTML = `
       <div class="item-header">
       <span id="item-color" class="col" style="background: ${newKanban.color};"></span>
-      <i id="edit_${newKanban.id}" class="material-icons col edit">edit</i>
+      <div id="open-edit_container__${newKanban.id}" class="open-edit_container" style="display: none;">
+        <div class="open-edit">
+          <i id="delete_${newKanban.id}" class="material-icons col icon delete">delete</i>
+          <i id="done_${newKanban.id}" class="material-icons col icon done">done</i>
+          <i id="clear_${newKanban.id}" class="material-icons col icon clear">clear</i>  
+        </div>
+      </div>
+    <i id="edit_${newKanban.id}" class="material-icons col icon edit">edit</i>
     </div>
     <form class="edit-form edit-form_${newKanban.id}">
     <div class="edit-grid">
-      <input type="text" name="" value="${newKanban.text}" id="kanban-input_${newKanban.id}" class="kanban-input">
-      <button class="edit-button undo"><i id="exit-icon_${newKanban.id}" class="material-icons exit-icon">clear</i></button>                        
+      <input type="text" name="" value="${newKanban.text}" id="kanban-input_${newKanban.id}" class="kanban-input">                      
     </div>
    </form>
     <div id="kanban-text_${newKanban.id}" class="item-text">
@@ -376,19 +598,27 @@ const UICtrl = (function () {
       ItemCtrl.removeSelectedKanban();
     },
 
+    UIdeleteKanban: function(kanban) {
+      kanban.remove();
 
-    toUpperCase: function(string) {
+    },
+
+    UIdeleteList: function(id) {
+      document.querySelector(`#list-${id}`).remove();
+    },
+
+    toUpperCase: function (string) {
       const char = string.charAt(0).toUpperCase();
-      string = char + string.slice(1, string.length)
-  
-      return string
+      string = char + string.slice(1, string.length);
+
+      return string;
     },
   };
 })();
 
 // App Controller
 
-const App = (function (ListCtrl, ItemCtrl, UICtrl) {
+const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
   // Get selectors
   const selectors = UICtrl.getSelectors();
 
@@ -400,10 +630,8 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl) {
     // Create Kanban
     const forms = document.querySelectorAll(selectors.form);
     forms.forEach((form) => {
-
       form.addEventListener('submit', createKanban);
     });
-
 
     // purpose: prevent from reassigning every event listener when new elements is being created.
     document.querySelector(selectors.board).addEventListener('click', determine);
@@ -419,20 +647,29 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl) {
       constructEmptyKanban(e);
     } else if (e.target.classList.contains('edit')) {
       enterEditState(e, id);
-    } else if (e.target.classList.contains('exit-icon')) {
+    } else if (e.target.classList.contains('clear')) {
       leaveEditState(id);
-    } else if (e.target.classList.contains('exit-icon')) {
-      leaveEditState(id);
-    } else if(e.target.classList.contains('add-title')) {
+    } else if (e.target.classList.contains('add-title')) {
       addListTitle(e, id);
+    } else if (e.target.classList.contains('done')) {
+      updateKanban(e)
+    } else if (e.target.classList.contains('delete')) {
+      deleteKanban(e)
+    } else if (e.target.classList.contains('update-title')) {
+      updateListTitle(e)
+    } else if (e.target.classList.contains('list-title')) {
+      initListTitle(e, id)
+    } else if (e.target.classList.contains('delete-list')) {
+      deleteList(e);
     }
 
     e.preventDefault();
   };
 
   const constructListColor = function () {
-    const symLet = ['a', 'b', 'c', 'd', 'e', 'f', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-    let color = `#94`; // always begin with #94 for a consistant color design.
+    // Generate a light color for each list
+    const symLet = ['a', 'b', 'c', 'd', 'e', 'f'];
+    let color = `#`;
     for (let i = 0; i < 4; i++) {
       color += symLet[Math.floor(Math.random() * symLet.length)];
     }
@@ -440,26 +677,78 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl) {
   };
 
   const createList = function () {
-    if(ItemCtrl.getSelectedKanban() !== null) {
+    if (ItemCtrl.getSelectedKanban() !== null) {
       isInEditState();
     }
     const color = constructListColor();
     const newList = ListCtrl.constructList(color);
+    // Add list to LS
+    StorageCtrl.storeList(newList);
     UICtrl.UIconstructList(newList);
     // re-assign event listeners to newly createn items.
-    loadEventListeners();      
+    loadEventListeners();
   };
 
-  const addListTitle = function(e, id) {
+  const addListTitle = function (e, id) {
     document.querySelector(`#${e.target.id}`).addEventListener('keypress', (e) => {
       if (e.keycode === 13 || e.which === 13) {
         const target = e.target;
         ListCtrl.addListTitle(target, id);
-        UICtrl.UIaddListTitle(target, id)
-
+        // Add title to list - LS
+        StorageCtrl.storeListTitle(target, id);
+        UICtrl.UIaddListTitle(target, id);
+        // initListTitle(id);
         e.preventDefault();
       }
     });
+  };
+
+  const deleteList = function(e) {
+    const ID = parseInt(e.target.id.charAt(e.target.id.length - 1));
+    const lists = ListCtrl.deleteList(ID);
+    StorageCtrl.deleteList(lists);
+    const kanbans = ItemCtrl.deleteKanbanFromList(ID);
+    StorageCtrl.deleteKanbanFromList(kanbans);
+    UICtrl.UIdeleteList(ID);
+  };
+
+
+  const initListTitle = function(e, id) {
+    const title = document.querySelector(`#list-title_${id}`);
+    title.setAttribute('contenteditable', 'true');
+      enterUpdateTitleState(e);
+
+      title.addEventListener('keypress', (e) => {
+        if (e.keycode === 13 || e.which === 13) {
+          e.preventDefault();
+          return false;
+        }
+      });
+  };
+
+  const enterUpdateTitleState = function(e) {
+    const done = e.target.parentNode.lastElementChild;
+    const add = e.target.parentNode.children[1];
+
+    add.style.display = 'none'
+    done.style.display = 'block'
+  }
+
+  const leaveUpdateTitleState = function(e) {
+    const done = e.target.parentNode.lastElementChild;
+    const add = e.target.parentNode.children[1];
+
+    add.style.display = 'block'
+    done.style.display = 'none'
+  }
+
+  const updateListTitle = function(e) {
+    const list = e.target.parentNode.parentNode
+    const newTitle = e.target.parentNode.firstElementChild.textContent;
+    ListCtrl.updateListTitle(list, newTitle);
+    // Update list title - LS
+    StorageCtrl.updateListTitle(list, newTitle);
+    leaveUpdateTitleState(e)
   };
 
   const constructEmptyKanban = function (e) {
@@ -478,63 +767,73 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl) {
     const correspColor = ListCtrl.getListColor(correspList);
     // Construct Kanban object
     const kanban = ItemCtrl.constructKanban(kanbanText, listParentId, correspColor);
+    // Add kanban to LS
+    StorageCtrl.storeKanban(kanban);
     // Construct UI Kanban
     UICtrl.UIconstructKanban(listParent, kanban);
     makeDraggable();
     e.preventDefault();
   };
 
-  const makeDraggable = function() {
+  const makeDraggable = function () {
     // global variables hack
     let vars = {};
 
     const draggables = document.querySelectorAll('.item');
     const lists = document.querySelectorAll('.list');
 
-    draggables.forEach(draggable => {
+    draggables.forEach((draggable) => {
       draggable.addEventListener('dragstart', () => {
-        draggable.classList.add('dragging')
-      }); 
+        draggable.classList.add('dragging');
+      });
 
       draggable.addEventListener('dragend', () => {
+        const list = document.querySelector('.dragging').parentNode;
         draggable.classList.remove('dragging');
-        ItemCtrl.dragSwitch(vars.kanbanObj);
-        console.log(vars)
+        const positionUpdate = ItemCtrl.dragSwitch(vars.kanbanObj, list);
+        // Update kanban position - LS
+        StorageCtrl.dragSwitch(positionUpdate);
+
+        // Make sure there's no duplicate kanbans
+        const kanbans = ItemCtrl.removeDuplicate();
+        // Make sure there's no duplicate kanbans - LS
+        StorageCtrl.removeDuplicate(kanbans);
+        const kanbanData = ItemCtrl.getKanbanData();
+        kanbanData.kanbans = kanbans;
       });
     });
 
-    lists.forEach(list => {
-      list.addEventListener('dragover', e => {
+    lists.forEach((list) => {
+      list.addEventListener('dragover', (e) => {
         e.preventDefault();
         vars.afterElement = getDragAfterElement(list, e.clientY);
         const draggable = document.querySelector('.dragging');
-        if(vars.afterElement === null) {
-          list.lastElementChild.firstElementChild.appendChild(draggable);    
-          vars = {};
+        if (vars.afterElement === null || vars.afterElement === undefined) {
+          list.lastElementChild.firstElementChild.appendChild(draggable);
           vars.kanbanObj = ItemCtrl.getSwitchItems(draggable, vars.afterElement);
         } else {
           list.lastElementChild.firstElementChild.insertBefore(draggable, vars.afterElement);
-          // Replace position
-          vars = {};
-          vars.kanbanObj = ItemCtrl.getSwitchItems(draggable, vars.afterElement);
 
+          vars.kanbanObj = ItemCtrl.getSwitchItems(draggable, vars.afterElement);
         }
-      })
+      });
     });
 
     function getDragAfterElement(list, y) {
       const draggableElements = [...list.querySelectorAll('.item:not(.dragging)')];
 
-      return draggableElements.reduce((closest, child) => {
-        const box = child.getBoundingClientRect();
-        const offset = y - box.top - box.height / 2;
-        if(offset < 0 && offset > closest.offset) {
-          return { offset: offset, element: child }
-        } else {
-          return closest;
-        }
-        
-      }, { offset: Number.NEGATIVE_INFINITY }).element;
+      return draggableElements.reduce(
+        (closest, child) => {
+          const box = child.getBoundingClientRect();
+          const offset = y - box.top - box.height / 2;
+          if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+          } else {
+            return closest;
+          }
+        },
+        { offset: Number.NEGATIVE_INFINITY }
+      ).element;
     }
   };
 
@@ -545,9 +844,8 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl) {
       const kanban = form.parentNode;
       const selected = ItemCtrl.setSelectedKanban(kanban);
       UICtrl.UIenterEditState(id);
-      console.log(id)
-      
-      // Submit on enter
+
+      // Submit on enter (hacky fallback for done button)
       document.querySelector(`#${e.target.parentNode.parentNode.id}`).addEventListener('keypress', (e) => {
         if (e.keycode === 13 || e.which === 13) {
           const newText = form.firstElementChild.firstElementChild.value;
@@ -565,12 +863,34 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl) {
     UICtrl.UIleaveEditState(id);
   };
 
-  const isInEditState = function() {
+  const updateKanban = function(e) {
+    const form = e.target.parentNode.parentNode.parentNode.nextSibling.nextSibling;
+    const newText = form.firstElementChild.firstElementChild.value;
+    const kanban = form.parentNode;
+    const selected = ItemCtrl.setSelectedKanban(kanban);
+    const updatedKanban = ItemCtrl.updateKanban(newText, selected);
+    // Update kanban - LS
+    StorageCtrl.updateKanban(updatedKanban);
+    UICtrl.UIupdateKanban(kanban, updatedKanban);
+
+    e.preventDefault();
+  };
+
+  const deleteKanban = function(e) {
+    const kanban = e.target.parentNode.parentNode.parentNode.parentNode;
+    UICtrl.UIdeleteKanban(kanban);
+    // Delete kanban - LS
+    StorageCtrl.deleteKanbanFromStorage(kanban);
+    ItemCtrl.deleteKanban(kanban);
+    leaveEditState();
+  };
+
+  const isInEditState = function () {
     const editForms = document.querySelectorAll('.edit-form');
-    editForms.forEach(form => {
-      if(form.style.display != 'none') {
+    editForms.forEach((form) => {
+      if (form.style.display != 'none') {
         let id = form.classList[1].charAt(form.classList[1].length - 1);
-        UICtrl.UIleaveEditState(id);        
+        UICtrl.UIleaveEditState(id);
       }
     });
     ItemCtrl.removeSelectedKanban();
@@ -583,10 +903,12 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl) {
       UICtrl.populateBoard(lists);
 
       loadEventListeners();
-
-      
     },
+
+    AppMakeDraggable: function() {
+      return makeDraggable();
+    }
   };
-})(ListCtrl, ItemCtrl, UICtrl);
+})(ListCtrl, ItemCtrl, UICtrl, StorageCtrl);
 
 App.init();
