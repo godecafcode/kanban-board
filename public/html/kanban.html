@@ -15,56 +15,53 @@
           <div class="board">
             <!-- DEMO LISTS BEGIN -->
 
-            <div class="list">
+            <!-- <div class="list">
               <div class="list-header misc_spread-sm">
-               
-                  <input type="text" name="" id="add-title" class="add-title" placeholder="Add title">
-                
-                <i class="material-icons head-icon show-more_header">more_horiz</i>
-                <!-- <div class="open-head_container">
-                  <div class="head-icons">
-                    <i class="material-icons head-icon delete-list">delete</i>       
-                    <i class="material-icons head-icon clear-list">clear_all</i>       
-                  </div>
-                </div> -->
+                <input type="text" name="" id="add-title" class="add-title" placeholder="Add title" />
 
+                <i class="material-icons head-icon show-more_header">check_circle_outline</i>
+                <i class="material-icons head-icon show-more_header">more_horiz</i>
               </div>
               <div class="list-body misc_spread-sm">
                 <div id="list-body" class="list-body_grid">
-                  <div id="item-1" class="item misc_spread-md">
+                  <div id="kanban" class="item misc_spread-md" draggable="true">
                     <div class="item-header">
-                      <span id="item-color-demo" class="col"></span>
-                      <div class="open-edit_container" style="display: none;">
-                        <div class="open-edit">
-                          <i class="material-icons col delete icon">delete</i>
-                          <i class="material-icons col done icon">done</i>
-                          <i class="material-icons col clear icon">clear</i>  
-                        </div>
-                      </div>
-                      <i class="material-icons col icon edit">edit</i>
+                    <span id="item-color" class="col"></span>
+                    <div id="open-edit_container" class="open-edit_container" style="display: block;">
+                    <div class="open-edit">
+                      <i id="delete" class="material-icons col icon delete">delete</i>
+                      <i id="done" class="material-icons col icon done">done</i>
+                      <i id="clear" class="material-icons col icon clear">clear</i>  
                     </div>
-                    <form class="form">
-                      <div class="edit-grid">
-                        <input type="text" name="" id="kanban-input" class="kanban-input">
-                   
-                      </div>
-                     </form>
+                  </div>
+                  <i id="edit" class="material-icons col icon edit" style="display: none;">edit</i>
+                  </div>
+                    <form class="edit-form edit-form" style="display: block;">
+                    <div class="edit-grid">
+                      <input type="text" name="" id="kanban-input" class="kanban-input">                     
+                    </div>
+                    <div class="char-limit_container">
+                      <p><span id="char-limit">0</span>/60</p>
+                    </div>  
+                  </form>
+            
+
+                  <div id="kanban-text" class="item-text" style="display: none;">
+                    <p id="text" class="kanban-text">Lorem ipsum dolor sit amet consectetur.</p>
+                  </div>
                   </div>
                 </div>
               </div>
-            </div>
-
+            </div> -->
             <!-- DEMO LISTS END -->
           </div>
-
           <div class="buttons-container">
             <div class="buttons cta">
               <button id="add" class="button"><i class="material-icons btn-icon">add</i></button>
               <!-- <button id="toggle-edit" class="button"><i class="material-icons btn-icon_separate">edit</i></button>
               <button id="toggle-remove" class="button"><i class="material-icons btn-icon">remove</i></button> -->
-            </div>            
+            </div>
           </div>
-
         </div>
       </div>
     </div>

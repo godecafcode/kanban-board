@@ -16,13 +16,13 @@ const StorageCtrl = (function() {
       }
     },
 
-    storeListTitle: function(target, id) {
+    storeListTitle: function(newTitle, id) {
       let lists = JSON.parse(localStorage.getItem('lists'));
       const ID = parseInt(id);
 
       lists.forEach(list => {
         if(list.id === ID) {
-          list.name = target.value;
+          list.name = newTitle;
         }
       });
 
@@ -458,6 +458,7 @@ const UICtrl = (function () {
       <input type="text" name="" id="add-title_${newList.id}" class="add-title" placeholder="Add title">
       <i class="material-icons add-kanban">add_circle_outline</i>
       <i id="check_${newList.id}" class="material-icons head-icon update-title" style="display: none;">check_circle_outline</i>
+      
       <div class="open-head_container" style="display: none;">
       <div class="head-icons">
         <i id="delete-list_${newList.id}" class="material-icons head-icon delete-list">delete</i>       
@@ -485,12 +486,12 @@ const UICtrl = (function () {
     UIaddListTitle: function (target, id) {
       const lists = document.querySelectorAll('.list');
       lists.forEach((list) => {
-        if (list.id.charAt(list.id.length - 1) === id) {
+        if (parseInt(list.id.charAt(list.id.length - 1)) === id) {
           list.firstElementChild.firstElementChild.remove();
           const h1 = document.createElement('h1');
           h1.id = `list-title_${id}`;
           h1.className = 'list-title';
-          h1.textContent = this.toUpperCase(target.value);
+          h1.textContent = App.AppToUpperCase(target.value);
 
           const parentNode = document.querySelector(`#list-header_${id}`);
           const referenceNode = parentNode.firstElementChild;
@@ -553,6 +554,7 @@ const UICtrl = (function () {
     },
 
     UIenterEditState: function (id) {
+      console.log(id)
       // Show edit menu
       document.querySelector(`#open-edit_container__${id}`).style.display = 'block';
 
@@ -607,12 +609,7 @@ const UICtrl = (function () {
       document.querySelector(`#list-${id}`).remove();
     },
 
-    toUpperCase: function (string) {
-      const char = string.charAt(0).toUpperCase();
-      string = char + string.slice(1, string.length);
 
-      return string;
-    },
   };
 })();
 
@@ -641,29 +638,55 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
   //? Add event listeners for those buttons, both finished and back button
 
   const determine = function (e) {
-    const id = e.target.id.charAt(e.target.id.length - 1);
+    const id = stringSplitID(e);
 
-    if (e.target.classList.contains('add-kanban')) {
-      constructEmptyKanban(e);
-    } else if (e.target.classList.contains('edit')) {
-      enterEditState(e, id);
-    } else if (e.target.classList.contains('clear')) {
-      leaveEditState(id);
-    } else if (e.target.classList.contains('add-title')) {
-      addListTitle(e, id);
-    } else if (e.target.classList.contains('done')) {
-      updateKanban(e)
-    } else if (e.target.classList.contains('delete')) {
-      deleteKanban(e)
-    } else if (e.target.classList.contains('update-title')) {
-      updateListTitle(e)
-    } else if (e.target.classList.contains('list-title')) {
-      initListTitle(e, id)
-    } else if (e.target.classList.contains('delete-list')) {
-      deleteList(e);
+    const cls = e.target.classList;
+
+    switch (true) {
+      case cls.contains('add-kanban'):
+        constructEmptyKanban(e);
+        break;
+      case cls.contains('edit'):
+        enterEditState(e, id);
+        break;
+      case cls.contains('clear'):
+        leaveEditState(id);
+        console.log('clear')
+        break;
+      case cls.contains('add-title'):
+        addListTitle(e, id);
+        break;
+      case cls.contains('done'):
+        updateKanban(e)
+        break;
+      case cls.contains('delete'):
+        deleteKanban(e)
+        break;
+      case cls.contains('update-title'):
+        updateListTitle(e)
+        break;
+      case cls.contains('list-title'):
+        initListTitle(e, id)
+        break;
+      case cls.contains('delete-list'):
+        deleteList(e);
+        break;
+    
+      default:
+        break;
     }
 
     e.preventDefault();
+  };
+
+  /* 
+  Each dynamically added item and list has unique number added onto to their id.
+  The function below extracts that number by splitting the str at '_' and use regex to find it and proceeds to turn it in to a string using .join method.
+  */
+  const stringSplitID = function(e) {
+    const regex = /\D/g;
+    const ID = e.target.id.split('_').filter(str => !regex.test(str)).join('');
+    return parseInt(ID);
   };
 
   const constructListColor = function () {
@@ -690,12 +713,14 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
   };
 
   const addListTitle = function (e, id) {
+    
     document.querySelector(`#${e.target.id}`).addEventListener('keypress', (e) => {
       if (e.keycode === 13 || e.which === 13) {
         const target = e.target;
+        const newTitle = toUpperCase(target.value);
         ListCtrl.addListTitle(target, id);
         // Add title to list - LS
-        StorageCtrl.storeListTitle(target, id);
+        StorageCtrl.storeListTitle(newTitle, id);
         UICtrl.UIaddListTitle(target, id);
         // initListTitle(id);
         e.preventDefault();
@@ -704,7 +729,8 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
   };
 
   const deleteList = function(e) {
-    const ID = parseInt(e.target.id.charAt(e.target.id.length - 1));
+    const ID = stringSplitID(e);
+    console.log(ID)
     const lists = ListCtrl.deleteList(ID);
     StorageCtrl.deleteList(lists);
     const kanbans = ItemCtrl.deleteKanbanFromList(ID);
@@ -727,7 +753,7 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
   };
 
   const enterUpdateTitleState = function(e) {
-    const done = e.target.parentNode.lastElementChild;
+    const done = e.target.parentNode.children[2];
     const add = e.target.parentNode.children[1];
 
     add.style.display = 'none'
@@ -735,7 +761,7 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
   }
 
   const leaveUpdateTitleState = function(e) {
-    const done = e.target.parentNode.lastElementChild;
+    const done = e.target.parentNode.children[2];
     const add = e.target.parentNode.children[1];
 
     add.style.display = 'block'
@@ -744,7 +770,7 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
 
   const updateListTitle = function(e) {
     const list = e.target.parentNode.parentNode
-    const newTitle = e.target.parentNode.firstElementChild.textContent;
+    const newTitle = toUpperCase(e.target.parentNode.firstElementChild.textContent);
     ListCtrl.updateListTitle(list, newTitle);
     // Update list title - LS
     StorageCtrl.updateListTitle(list, newTitle);
@@ -860,7 +886,9 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
 
   const leaveEditState = function (id) {
     ItemCtrl.removeSelectedKanban();
-    UICtrl.UIleaveEditState(id);
+    if(id) {
+      UICtrl.UIleaveEditState(id);
+    }
   };
 
   const updateKanban = function(e) {
@@ -896,6 +924,13 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
     ItemCtrl.removeSelectedKanban();
   };
 
+  const toUpperCase = function(string) {
+    const char = string.charAt(0).toUpperCase();
+    string = char + string.slice(1, string.length);
+
+    return string;
+  }
+
   return {
     init: function () {
       // Get all lists from ListCtrl.getLists
@@ -907,7 +942,15 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
 
     AppMakeDraggable: function() {
       return makeDraggable();
-    }
+    },
+
+    AppStringSplitID: function() {
+      return stringSplitID();
+    },
+
+    AppToUpperCase: function (string) {
+      return toUpperCase(string);
+    },
   };
 })(ListCtrl, ItemCtrl, UICtrl, StorageCtrl);
 
