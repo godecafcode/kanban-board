@@ -181,6 +181,7 @@ body {
               grid-template-rows: repeat(auto-fit, 95px);
               gap: 10px;
               padding-top: 10px;
+              
 
               .item {
                 width: 100%;
@@ -192,6 +193,7 @@ body {
                 // cursor: move;
                 background: #FCFCFC;
                 border: 1px solid #eeeeee;
+                
 
                 .item-header {
                   height: 100%;
@@ -242,12 +244,16 @@ body {
                 }
 
                 .item-text {
+                  overflow-wrap: break-word;
 
                   #text {
                     color: #333;
                     font-size: 16px;
                     font-weight: 600;
                     padding-left: 5px;
+                  }
+                  .kanban-text {
+                    overflow-wrap: anywhere; 
                   }
 
 
@@ -258,6 +264,7 @@ body {
                     display: grid;
                     grid-template-columns: auto 40px 40px;
                     align-items: center;
+                    position: relative; 
 
                     button {
                       width: 25px;
@@ -409,16 +416,19 @@ body {
 
 }
 
+.form {
+  position: relative;
+}
+
    
   
   .char-limit_container {
     position: absolute;
     right: 0;
-
     p {
       color: #DBDBDB; // beginning
-      color: $kanban-btn-yellow; // when close to limit
-      color: $kanban-btn-red; // when limit hit 
+      // color: $kanban-btn-yellow; // when close to limit
+      // color: $kanban-btn-red; // when limit hit 
       font-size: 14px;
     }
   }
