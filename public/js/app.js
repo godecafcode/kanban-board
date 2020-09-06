@@ -171,13 +171,13 @@ const ListCtrl = (function () {
       return list;
     },
 
-    addListTitle: function (target, id) {
-      console.log(target.value);
+    addListTitle: function (title, id) {
+      // console.log(target.value);
       const ID = parseInt(id);
       const lists = listData.lists;
       lists.forEach((list) => {
         if (list.id === ID) {
-          list.name = target.value;
+          list.name = title;
         }
       });
     },
@@ -217,6 +217,7 @@ const ItemCtrl = (function () {
   const kanbanData = {
     kanbans: StorageCtrl.getKanbansFromStorage(),
     selectedKanban: null,
+    isKanbanInProgress: false,
   };
 
   return {
@@ -230,6 +231,10 @@ const ItemCtrl = (function () {
 
     getSelectedKanban: function () {
       return kanbanData.selectedKanban;
+    },
+
+    getKanbanInProgress: function() {
+      return kanbanData.isKanbanInProgress;
     },
 
     constructKanban: function (kanbanText, listParentId, correspColor) {
@@ -254,6 +259,10 @@ const ItemCtrl = (function () {
         }
       });
       return kanbanData.selectedKanban;
+    },
+
+    setKanbanInProgress: function(bool) {
+      kanbanData.isKanbanInProgress = bool;
     },
 
     removeSelectedKanban: function () {
@@ -474,7 +483,8 @@ const UICtrl = (function () {
     </div>
     <div class="list-body misc_spread-sm">
       <div id="list-body_${newList.id}" class="list-body_grid">
-        <div id="item-1" class="item misc_spread-md">
+      <!-- <h1>Assign a Kanban</h1> -->
+      <!--  <div id="item-1" class="item misc_spread-md">
           <div class="item-header">
             <span id="item-color-demo" class="col" style="background: ${newList.color}"></span>
           </div>
@@ -484,7 +494,7 @@ const UICtrl = (function () {
                 <p id="char-limit-p_empty_${newList.id}"><span id="char-limit_empty_${newList.id}">0</span>/55</p>
               </div> 
           </form>
-        </div>
+        </div> -->
       </div>
     </div>
       `;
@@ -492,7 +502,7 @@ const UICtrl = (function () {
       document.querySelector(UISelectors.board).insertAdjacentElement('beforeend', list);
     },
 
-    UIaddListTitle: function (target, id) {
+    UIaddListTitle: function (title, id) {
       const lists = document.querySelectorAll('.list');
       lists.forEach((list) => {
         if (parseInt(list.id.charAt(list.id.length - 1)) === id) {
@@ -500,7 +510,7 @@ const UICtrl = (function () {
           const h1 = document.createElement('h1');
           h1.id = `list-title_${id}`;
           h1.className = 'list-title';
-          h1.textContent = App.AppToUpperCase(target.value);
+          h1.textContent = title;
 
           const parentNode = document.querySelector(`#list-header_${id}`);
           const referenceNode = parentNode.firstElementChild;
@@ -654,12 +664,14 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
 
   const determine = function (e) {
     const id = stringSplitID(e.target);
-
+    const isKanbanInProgress = ItemCtrl.getKanbanInProgress();
     const cls = e.target.classList;
 
     switch (true) {
       case cls.contains('add-kanban'):
-        constructEmptyKanban(e);
+        if(isKanbanInProgress === false) {
+          constructEmptyKanban(e);          
+        }
         break;
       case cls.contains('edit'):
         enterEditState(e, id);
@@ -723,6 +735,9 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
   };
 
   const createList = function () {
+    // Declare that there's an empty kanban about to be constructed.
+    // ItemCtrl.setKanbanInProgress(true);
+
     if (ItemCtrl.getSelectedKanban() !== null) {
       isInEditState();
     }
@@ -739,11 +754,12 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
     document.querySelector(`#${e.target.id}`).addEventListener('keypress', (e) => {
       if (e.keycode === 13 || e.which === 13) {
         const target = e.target;
-        const newTitle = toUpperCase(target.value);
-        ListCtrl.addListTitle(target, id);
+        const value = toUpperCase(target.value);
+        const title = (value.length >= 1) ? value : `List-${id}`;
+        ListCtrl.addListTitle(title, id);
         // Add title to list - LS
-        StorageCtrl.storeListTitle(newTitle, id);
-        UICtrl.UIaddListTitle(target, id);
+        StorageCtrl.storeListTitle(title, id);
+        UICtrl.UIaddListTitle(title, id);
         // initListTitle(id);
         e.preventDefault();
       }
@@ -791,7 +807,8 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
 
   const updateListTitle = function (e) {
     const list = e.target.parentNode.parentNode;
-    const newTitle = toUpperCase(e.target.parentNode.firstElementChild.textContent);
+    const newValue = toUpperCase(e.target.parentNode.firstElementChild.textContent);
+    const newTitle = (newValue.length >= 1) ? newValue : `List-${stringSplitID(list)}`
     ListCtrl.updateListTitle(list, newTitle);
     // Update list title - LS
     StorageCtrl.updateListTitle(list, newTitle);
@@ -799,6 +816,9 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
   };
 
   const constructEmptyKanban = function (e) {
+    // Declare that there's an empty kanban about to be constructed.
+    ItemCtrl.setKanbanInProgress(true);
+
     const target = e.target.parentNode.nextSibling.nextSibling.firstElementChild;
     console.log(target);
     const ID = stringSplitID(target);
@@ -821,6 +841,9 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
     // Construct UI Kanban
     UICtrl.UIconstructKanban(listParent, kanban);
     makeDraggable();
+
+    // Declare that there's no longer an empty kanban about to be constructed.
+    ItemCtrl.setKanbanInProgress(false);
     e.preventDefault();
   };
 
@@ -970,7 +993,6 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
     ItemCtrl.removeSelectedKanban();
     if (id !== undefined) {
       console.log('test')
-      // if statement doesn't count digit 0 as something that exist apparently
       UICtrl.UIleaveEditState(id);
     }
   };

@@ -166,6 +166,7 @@ body {
 
           .list-body {
             width: 100%;
+            min-height: 105px;
             max-height: max-content;
             display: flex;
             overflow-y: scroll;
@@ -445,10 +446,14 @@ and (max-device-width : 1024px) {
         height: 100%;
         display: grid;
         grid-template-columns: auto;
-        grid-template-rows: auto max-content;
+        grid-template-rows: auto auto;
         
         .buttons-container {
           padding: 25px;
+
+          .buttons {
+            width: 100%;
+          }
         }
       }
     }    
