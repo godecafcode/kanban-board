@@ -19,9 +19,15 @@
             <!-- <div class="list">
               <div class="list-header misc_spread-sm">
                 <input type="text" name="" id="add-title" class="add-title" placeholder="Add title" />
+                
+                <div class="open-head_container" style="display: none;">
+                  <div class="head-icons">
+                    <i id="delete-list_${newList.id}" class="material-icons head-icon delete-list">delete</i>       
+                    <i id="clear-list_${newList.id}" class="material-icons head-icon clear-list">clear_all</i>       
+                  </div>
+                </div>
 
-                <i class="material-icons head-icon show-more_header">check_circle_outline</i>
-                <i class="material-icons head-icon show-more_header">more_horiz</i>
+                <i class="material-icons add-kanban">more_horiz</i>
               </div>
               <div class="list-body misc_spread-sm">
                 <div id="list-body" class="list-body_grid">
@@ -50,6 +56,14 @@
                   <div id="kanban-text" class="item-text" style="display: none;">
                     <p id="text" class="kanban-text">Lorem ipsum dolor sit amet consectetur.</p>
                   </div>
+                  </div>
+                </div>
+              </div>
+              <div class="add-knbn_container misc_spread-sm">
+                <div class="add-knbn">
+                  <div class="icons">
+                    <i id="clear-list_${newList.id}" class="material-icons head-icon add">add</i>
+                    <h1 class="add-task">add new task</h1>                    
                   </div>
                 </div>
               </div>

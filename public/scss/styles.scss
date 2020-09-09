@@ -108,6 +108,11 @@ body {
             border-bottom: 1px solid #eee;
             background: $kanban-header;
             
+
+            #svg-icon {
+              filter: invert(59%) sepia(41%) saturate(0%) hue-rotate(282deg) brightness(106%) contrast(86%);
+            }
+            
             .head-icons {
               display: flex;
               place-self: center;
@@ -170,8 +175,10 @@ body {
             max-height: max-content;
             display: flex;
             overflow-y: scroll;
-            margin-bottom: 10px;
+            
+            // margin-bottom: 10px;
             // place-items: center;
+
 
             .list-body_grid {
               width: 100%;
@@ -223,11 +230,13 @@ body {
                     margin-right: auto;
                   }
                   .open-edit_container {
+                    display: none;
                     .open-edit {
                       display: flex;
                       place-items: center;
                     }
                   }
+
 
                   .icon {
                     color: #DBDBDB;
@@ -324,6 +333,39 @@ body {
 
           }
 
+          .list-body::-webkit-scrollbar {
+            display: none;
+          }
+
+          .add-knbn_container {
+            width: 100%;
+            height: 65px;
+            display: flex;
+            place-items: center;
+
+            .add-knbn {
+              width: max-content;
+              height: 35px;
+              display: flex;
+              align-items: flex-end;
+              
+
+              .icons {
+                display: flex;
+                align-items: center;
+                color: #a8a8a8;
+
+                .add {
+                  font-size: 22px;
+                }
+
+                h1 {
+                  font-size: 14px;
+                  text-transform: uppercase;
+                }
+              }
+            }
+          }
 
 
 

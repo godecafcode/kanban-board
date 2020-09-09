@@ -52,9 +52,10 @@ const StorageCtrl = (function () {
       return lists;
     },
 
-    deleteList: function (list) {
-      console.log(list);
-      localStorage.setItem('lists', JSON.stringify(list));
+    deleteList: function (id) {
+      const lists = JSON.parse(localStorage.getItem('lists'));
+      const filteredLists = lists.filter(list => list.id !== id);
+      localStorage.setItem('lists', JSON.stringify(filteredLists));
     },
 
     //? Kanban Storage
@@ -117,6 +118,15 @@ const StorageCtrl = (function () {
     removeDuplicate: function (kanbans) {
       localStorage.setItem('kanbans', JSON.stringify(kanbans));
     },
+
+    SCclearAllKanbans: function (id) {
+      const kanbans = JSON.parse(localStorage.getItem('kanbans'));
+      if(kanbans !== null) {
+        const filteredKanbans = kanbans.filter(kanban => kanban.parent !== `list-body_${id}`);
+        localStorage.setItem('kanbans', JSON.stringify(filteredKanbans));        
+      }
+
+    },
   };
 })();
 
@@ -167,12 +177,10 @@ const ListCtrl = (function () {
       const color = listColor;
       const list = new List(ID, name, color);
       listData.lists.push(list);
-      console.log(listData.lists);
       return list;
     },
 
     addListTitle: function (title, id) {
-      // console.log(target.value);
       const ID = parseInt(id);
       const lists = listData.lists;
       lists.forEach((list) => {
@@ -194,13 +202,7 @@ const ListCtrl = (function () {
     },
 
     deleteList: function (id) {
-      const lists = listData.lists;
-      lists.forEach((list, index) => {
-        if (list.id === id) {
-          lists.splice(index, 1);
-        }
-      });
-      return lists;
+      return listData.lists.filter((list) => list.id !== id);
     },
   };
 })();
@@ -233,7 +235,7 @@ const ItemCtrl = (function () {
       return kanbanData.selectedKanban;
     },
 
-    getKanbanInProgress: function() {
+    getKanbanInProgress: function () {
       return kanbanData.isKanbanInProgress;
     },
 
@@ -247,7 +249,6 @@ const ItemCtrl = (function () {
       const color = correspColor;
       const newKanban = new Kanban(ID, listParentId, color, kanbanText);
       kanbanData.kanbans.push(newKanban);
-      console.log(newKanban);
       return newKanban;
     },
 
@@ -261,12 +262,18 @@ const ItemCtrl = (function () {
       return kanbanData.selectedKanban;
     },
 
-    setKanbanInProgress: function(bool) {
+    setKanbanInProgress: function (bool) {
       kanbanData.isKanbanInProgress = bool;
     },
 
     removeSelectedKanban: function () {
       kanbanData.selectedKanban = null;
+    },
+
+    ICclearAllKanbans: function (id) {
+      const kanbans = kanbanData.kanbans;
+      const filteredKanbans = kanbans.filter((kanban) => kanban.parent !== `list-body_${id}`);
+      kanbanData.kanbans = filteredKanbans;
     },
 
     updateKanban: function (newText, selectedKanban) {
@@ -439,10 +446,10 @@ const UICtrl = (function () {
           }
         });
         UIlists += `
-        <div id="list-${list.id}" class="list">
+        <div id="list_${list.id}" class="list">
         <div class="list-header misc_spread-sm" style="background: ${list.color}">
           <h1 id="list-title_${list.id}" class="list-title" contenteditable="true">${list.name}</h1>
-          <i class="material-icons add-kanban">add_circle_outline</i>
+          
           <i id="check_${list.id}" class="material-icons head-icon update-title" style="display: none;">check_circle_outline</i>
           <div class="open-head_container" style="display: none;">
           <div class="head-icons">
@@ -450,12 +457,21 @@ const UICtrl = (function () {
             <i id="clear-list_${list.id}" class="material-icons head-icon clear-list">clear_all</i>       
           </div>
         </div>
+        <i class="material-icons show-more">more_horiz</i>
         </div>
         <div class="list-body misc_spread-sm">
           <div id="list-body_${list.id}" class="list-body_grid">
           ${items}
           </div>
         </div>
+        <div class="add-knbn_container misc_spread-sm">
+        <div class="add-knbn">
+          <div class="icons">
+            <i id="clear-list_${list.id}" class="material-icons head-icon add">add</i>
+            <h1 class="add-task">add new task</h1>                    
+          </div>
+        </div>
+      </div>
       </div>
         `;
       });
@@ -466,12 +482,12 @@ const UICtrl = (function () {
 
     UIconstructList: function (newList) {
       const list = document.createElement('div');
-      list.id = `list-${newList.id}`;
+      list.id = `list_${newList.id}`;
       list.className = 'list';
       list.innerHTML = `
       <div id="list-header_${newList.id}" class="list-header misc_spread-sm" style="background: ${newList.color}">
       <input type="text" name="" id="add-title_${newList.id}" class="add-title" placeholder="Add title">
-      <i class="material-icons add-kanban">add_circle_outline</i>
+      
       <i id="check_${newList.id}" class="material-icons head-icon update-title" style="display: none;">check_circle_outline</i>
       
       <div class="open-head_container" style="display: none;">
@@ -480,6 +496,7 @@ const UICtrl = (function () {
         <i id="clear-list_${newList.id}" class="material-icons head-icon clear-list">clear_all</i>       
       </div>
     </div>
+    <i class="material-icons show-more">more_horiz</i>
     </div>
     <div class="list-body misc_spread-sm">
       <div id="list-body_${newList.id}" class="list-body_grid">
@@ -497,6 +514,14 @@ const UICtrl = (function () {
         </div> -->
       </div>
     </div>
+    <div class="add-knbn_container misc_spread-sm">
+    <div class="add-knbn">
+      <div class="icons">
+        <i id="clear-list_${newList.id}" class="material-icons head-icon add">add</i>
+        <h1 class="add-task">add new task</h1>                    
+      </div>
+    </div>
+  </div>
       `;
 
       document.querySelector(UISelectors.board).insertAdjacentElement('beforeend', list);
@@ -506,6 +531,7 @@ const UICtrl = (function () {
       const lists = document.querySelectorAll('.list');
       lists.forEach((list) => {
         if (parseInt(list.id.charAt(list.id.length - 1)) === id) {
+          // change to split function
           list.firstElementChild.firstElementChild.remove();
           const h1 = document.createElement('h1');
           h1.id = `list-title_${id}`;
@@ -514,15 +540,12 @@ const UICtrl = (function () {
 
           const parentNode = document.querySelector(`#list-header_${id}`);
           const referenceNode = parentNode.firstElementChild;
-          console.log(parentNode);
-          console.log(referenceNode);
           parentNode.insertBefore(h1, referenceNode);
         }
       });
     },
 
-    UIconstructEmptyKanban: function (target, correspColor, id) {
-      console.log(correspColor);
+    UIconstructEmptyKanban: function (correspColor, id) {
       const kanban = document.createElement('div');
       kanban.id = `kanban-empty`;
       kanban.className = 'item misc_spread-md';
@@ -538,12 +561,10 @@ const UICtrl = (function () {
       </form>
       `;
 
-      document.querySelector(`#${target}`).insertAdjacentElement('beforeend', kanban);
+      document.querySelector(`#list-body_${id}`).insertAdjacentElement('beforeend', kanban);
     },
 
     UIconstructKanban: function (demoParent, kanbanObj) {
-      // console.log('OBJECT BELOW')
-      // console.log(kanbanObj)
       demoParent.remove();
       // ItemCtrl.removeSelectedKanban();
       const kanban = document.createElement('div');
@@ -579,7 +600,6 @@ const UICtrl = (function () {
     },
 
     UIenterEditState: function (id) {
-      console.log(id);
       // Show edit menu
       document.querySelector(`#open-edit_container_${id}`).style.display = 'block';
 
@@ -632,8 +652,18 @@ const UICtrl = (function () {
       kanban.remove();
     },
 
+    UCclearAllKanbans: function (id) {
+      const listGrid = document.querySelectorAll('.list-body_grid');
+
+      listGrid.forEach(function (grid) {
+        if (grid.id === `list-body_${id}`) {
+          grid.innerHTML = '';
+        }
+      });
+    },
+
     UIdeleteList: function (id) {
-      document.querySelector(`#list-${id}`).remove();
+      document.querySelector(`#list_${id}`).remove();
     },
   };
 })();
@@ -668,9 +698,9 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
     const cls = e.target.classList;
 
     switch (true) {
-      case cls.contains('add-kanban'):
-        if(isKanbanInProgress === false) {
-          constructEmptyKanban(e);          
+      case cls.contains('add-task'):
+        if (isKanbanInProgress === false) {
+          constructEmptyKanban(e);
         }
         break;
       case cls.contains('edit'):
@@ -679,6 +709,12 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
         break;
       case cls.contains('clear'):
         leaveEditState(id);
+        break;
+      case cls.contains('clear-list'):
+        clearAllKanbans(id);
+        break;
+      case cls.contains('show-more'):
+        toggleListCtas(e);
         break;
       case cls.contains('add-title'):
         addListTitle(e, id);
@@ -696,14 +732,13 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
         initListTitle(e, id);
         break;
       case cls.contains('delete-list'):
-        deleteList(e);
+        deleteList(id);
         break;
       case cls.contains('kanban-input_empty'):
         getEmptyElForLimit(e, id);
         break;
 
       default:
-        console.log('default trigger');
         break;
     }
 
@@ -726,7 +761,6 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
   const constructListColor = function () {
     // Generate a light color for each list
     const symLet = [...'abcdef'];
-    console.log(symLet);
     let color = `#`;
     for (let i = 0; i < 4; i++) {
       color += symLet[Math.floor(Math.random() * symLet.length)];
@@ -735,45 +769,56 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
   };
 
   const createList = function () {
-    // Declare that there's an empty kanban about to be constructed.
-    // ItemCtrl.setKanbanInProgress(true);
+    const selectedKanban = ItemCtrl.getSelectedKanban();
+    const lists = StorageCtrl.getListsFromStorage();
+    const listLimit = 4;
 
-    if (ItemCtrl.getSelectedKanban() !== null) {
-      isInEditState();
-    }
-    const color = constructListColor();
-    const newList = ListCtrl.constructList(color);
-    // Add list to LS
-    StorageCtrl.storeList(newList);
-    UICtrl.UIconstructList(newList);
-    // re-assign event listeners to newly createn items.
-    loadEventListeners();
-  };
-
-  const addListTitle = function (e, id) {
-    document.querySelector(`#${e.target.id}`).addEventListener('keypress', (e) => {
-      if (e.keycode === 13 || e.which === 13) {
-        const target = e.target;
-        const value = toUpperCase(target.value);
-        const title = (value.length >= 1) ? value : `List-${id}`;
-        ListCtrl.addListTitle(title, id);
-        // Add title to list - LS
-        StorageCtrl.storeListTitle(title, id);
-        UICtrl.UIaddListTitle(title, id);
-        // initListTitle(id);
-        e.preventDefault();
+    if(lists.length === listLimit) {
+      console.log('list limit reached, please remove a list before creating a new one.')
+      // throwMessage('list limit reached, please remove a list before creating a new one.', 'error');
+    } else {
+      if (selectedKanban !== null) {
+        isInEditState();
       }
-    });
+      const color = constructListColor();
+      const newList = ListCtrl.constructList(color);
+      // Add list to LS
+      StorageCtrl.storeList(newList);
+      UICtrl.UIconstructList(newList);
+      // re-assign event listeners to newly createn items.
+      loadEventListeners();
+    };
   };
 
-  const deleteList = function (e) {
-    const ID = stringSplitID(e.target);
-    console.log(ID);
-    const lists = ListCtrl.deleteList(ID);
-    StorageCtrl.deleteList(lists);
-    const kanbans = ItemCtrl.deleteKanbanFromList(ID);
-    StorageCtrl.deleteKanbanFromList(kanbans);
-    UICtrl.UIdeleteList(ID);
+    const addListTitle = function (e, id) {
+      document.querySelector(`#${e.target.id}`).addEventListener('keypress', (e) => {
+        if (e.keycode === 13 || e.which === 13) {
+          const target = e.target;
+          const value = toUpperCase(target.value);
+          const title = value.length >= 1 ? value : `List-${id}`;
+          ListCtrl.addListTitle(title, id);
+          // Add title to list - LS
+          StorageCtrl.storeListTitle(title, id);
+          UICtrl.UIaddListTitle(title, id);
+          // initListTitle(id);
+          e.preventDefault();
+        }
+      });      
+    }
+
+  const deleteList = function (id) {
+    ListCtrl.deleteList(id);
+    StorageCtrl.deleteList(id);
+    UICtrl.UIdeleteList(id);
+
+    // Remove attached kanbans
+    clearAllKanbans(id);
+  };
+
+  const clearAllKanbans = function (id) {
+    ItemCtrl.ICclearAllKanbans(id);
+    StorageCtrl.SCclearAllKanbans(id);
+    UICtrl.UCclearAllKanbans(id);
   };
 
   const initListTitle = function (e, id) {
@@ -789,17 +834,27 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
     });
   };
 
+  const toggleListCtas = function (e) {
+    const ctas = e.target.parentNode.children[2];
+
+    if (ctas.style.display === 'none') {
+      ctas.style.display = 'block';
+    } else if (ctas.style.display === 'block') {
+      ctas.style.display = 'none';
+    }
+  };
+
   const enterUpdateTitleState = function (e) {
-    const done = e.target.parentNode.children[2];
-    const add = e.target.parentNode.children[1];
+    const done = e.target.parentNode.children[1];
+    const add = e.target.parentNode.lastElementChild;
 
     add.style.display = 'none';
     done.style.display = 'block';
   };
 
   const leaveUpdateTitleState = function (e) {
-    const done = e.target.parentNode.children[2];
-    const add = e.target.parentNode.children[1];
+    const done = e.target.parentNode.children[1];
+    const add = e.target.parentNode.lastElementChild;
 
     add.style.display = 'block';
     done.style.display = 'none';
@@ -808,7 +863,7 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
   const updateListTitle = function (e) {
     const list = e.target.parentNode.parentNode;
     const newValue = toUpperCase(e.target.parentNode.firstElementChild.textContent);
-    const newTitle = (newValue.length >= 1) ? newValue : `List-${stringSplitID(list)}`
+    const newTitle = newValue.length >= 1 ? newValue : `List-${stringSplitID(list)}`;
     ListCtrl.updateListTitle(list, newTitle);
     // Update list title - LS
     StorageCtrl.updateListTitle(list, newTitle);
@@ -819,11 +874,10 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
     // Declare that there's an empty kanban about to be constructed.
     ItemCtrl.setKanbanInProgress(true);
 
-    const target = e.target.parentNode.nextSibling.nextSibling.firstElementChild;
-    console.log(target);
-    const ID = stringSplitID(target);
-    const listColor = ListCtrl.getListColor(e.target.parentNode.parentNode);
-    UICtrl.UIconstructEmptyKanban(target.id, listColor, ID);
+    const list = e.target.parentNode.parentNode.parentNode.parentNode;
+    const ID = stringSplitID(list);
+    const listColor = ListCtrl.getListColor(list);
+    UICtrl.UIconstructEmptyKanban(listColor, ID);
     // re-assign event listeners to newly createn items.
     loadEventListeners();
   };
@@ -939,10 +993,10 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
         vars.afterElement = getDragAfterElement(list, e.clientY);
         const draggable = document.querySelector('.dragging');
         if (vars.afterElement === null || vars.afterElement === undefined) {
-          list.lastElementChild.firstElementChild.appendChild(draggable);
+          list.children[1].firstElementChild.appendChild(draggable);
           vars.kanbanObj = ItemCtrl.getSwitchItems(draggable, vars.afterElement);
         } else {
-          list.lastElementChild.firstElementChild.insertBefore(draggable, vars.afterElement);
+          list.children[1].firstElementChild.insertBefore(draggable, vars.afterElement);
 
           vars.kanbanObj = ItemCtrl.getSwitchItems(draggable, vars.afterElement);
         }
@@ -979,8 +1033,11 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
       document.querySelector(`#${e.target.parentNode.parentNode.id}`).addEventListener('keypress', (e) => {
         if (e.keycode === 13 || e.which === 13) {
           const newText = form.firstElementChild.firstElementChild.value;
+          const selected = ItemCtrl.setSelectedKanban(kanban);
           const updatedKanban = ItemCtrl.updateKanban(newText, selected);
           UICtrl.UIupdateKanban(kanban, updatedKanban);
+          // Update kanban - LS
+          StorageCtrl.updateKanban(updatedKanban);
 
           e.preventDefault();
         }
@@ -989,10 +1046,8 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
   };
 
   const leaveEditState = function (id) {
-    
     ItemCtrl.removeSelectedKanban();
     if (id !== undefined) {
-      console.log('test')
       UICtrl.UIleaveEditState(id);
     }
   };
@@ -1003,10 +1058,9 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
     const kanban = form.parentNode;
     const selected = ItemCtrl.setSelectedKanban(kanban);
     const updatedKanban = ItemCtrl.updateKanban(newText, selected);
+    UICtrl.UIupdateKanban(kanban, updatedKanban);
     // Update kanban - LS
     StorageCtrl.updateKanban(updatedKanban);
-    UICtrl.UIupdateKanban(kanban, updatedKanban);
-
     e.preventDefault();
   };
 
