@@ -182,7 +182,8 @@ body {
 
             .list-body_grid {
               width: 100%;
-              height: max-content;
+              min-height: 105px;
+              // height: max-content;
               max-height: 425px;
               display: grid;
               grid-template-columns: 1fr;

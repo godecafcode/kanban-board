@@ -972,7 +972,8 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
       });
 
       draggable.addEventListener('dragend', () => {
-        const list = document.querySelector('.dragging').parentNode;
+        // const list = document.querySelector('.dragging').parentNode; //? maybe cannot read parentNode of null because the kanban with it's functions are dynamically loaded and can't read it until reload page?
+        const list = draggable.parentNode;
         draggable.classList.remove('dragging');
         const positionUpdate = ItemCtrl.dragSwitch(vars.kanbanObj, list);
         // Update kanban position - LS
