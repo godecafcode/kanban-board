@@ -1,4 +1,3 @@
-// Storage Controller
 
 const StorageCtrl = (function () {
   return {
@@ -29,9 +28,8 @@ const StorageCtrl = (function () {
       localStorage.setItem('lists', JSON.stringify(lists));
     },
 
-    updateListTitle: function (list, newTitle) {
+    updateListTitle: function (newTitle, listID) {
       let lists = JSON.parse(localStorage.getItem('lists'));
-      const listID = parseInt(list.id.charAt(list.id.length - 1));
 
       lists.forEach((list) => {
         if (list.id === listID) {
@@ -54,7 +52,7 @@ const StorageCtrl = (function () {
 
     deleteList: function (id) {
       const lists = JSON.parse(localStorage.getItem('lists'));
-      const filteredLists = lists.filter(list => list.id !== id);
+      const filteredLists = lists.filter((list) => list.id !== id);
       localStorage.setItem('lists', JSON.stringify(filteredLists));
     },
 
@@ -85,7 +83,6 @@ const StorageCtrl = (function () {
     updateKanban: function (updatedKanban) {
       let kanbans = JSON.parse(localStorage.getItem('kanbans'));
 
-      // Loop through and find identical IDs
       kanbans.forEach((kanban, index) => {
         if (kanban.id === updatedKanban.id) {
           kanbans.splice(index, 1, updatedKanban);
@@ -94,8 +91,7 @@ const StorageCtrl = (function () {
       localStorage.setItem('kanbans', JSON.stringify(kanbans));
     },
 
-    deleteKanbanFromStorage: function (deletedKanban) {
-      const deletedKanbanID = parseInt(deletedKanban.id.charAt(deletedKanban.id.length - 1));
+    deleteKanbanFromStorage: function (deletedKanbanID) {
       let kanbans = JSON.parse(localStorage.getItem('kanbans'));
 
       kanbans.forEach((kanban, index) => {
@@ -121,11 +117,10 @@ const StorageCtrl = (function () {
 
     SCclearAllKanbans: function (id) {
       const kanbans = JSON.parse(localStorage.getItem('kanbans'));
-      if(kanbans !== null) {
-        const filteredKanbans = kanbans.filter(kanban => kanban.parent !== `list-body_${id}`);
-        localStorage.setItem('kanbans', JSON.stringify(filteredKanbans));        
+      if (kanbans !== null) {
+        const filteredKanbans = kanbans.filter((kanban) => kanban.parent !== `list-body_${id}`);
+        localStorage.setItem('kanbans', JSON.stringify(filteredKanbans));
       }
-
     },
   };
 })();
@@ -153,12 +148,10 @@ const ListCtrl = (function () {
     },
 
     // Get corresponding list color to each kanban
-    getListColor: function (parentList) {
-      // Get the last character from parentList.id and parse the number > id
-      parentList = parseInt(parentList.id.charAt(parentList.id.length - 1));
+    getListColor: function (parentListID) {
       let color = '';
       listData.lists.forEach((list) => {
-        if (list.id === parentList) {
+        if (list.id === parentListID) {
           color = list.color;
         }
       });
@@ -181,17 +174,15 @@ const ListCtrl = (function () {
     },
 
     addListTitle: function (title, id) {
-      const ID = parseInt(id);
       const lists = listData.lists;
       lists.forEach((list) => {
-        if (list.id === ID) {
+        if (list.id === id) {
           list.name = title;
         }
       });
     },
 
-    updateListTitle: function (list, newTitle) {
-      const listID = parseInt(list.id.charAt(list.id.length - 1));
+    updateListTitle: function (newTitle, listID) {
       const lists = listData.lists;
 
       lists.forEach((list) => {
@@ -208,7 +199,7 @@ const ListCtrl = (function () {
 })();
 
 // Item Controller
-const ItemCtrl = (function () {
+const KanbanCtrl = (function () {
   const Kanban = function (id, parent, color, text) {
     this.id = id;
     this.parent = parent;
@@ -252,8 +243,7 @@ const ItemCtrl = (function () {
       return newKanban;
     },
 
-    setSelectedKanban: function (kanban) {
-      const kanbanID = parseInt(kanban.id.charAt(kanban.id.length - 1));
+    setSelectedKanban: function (kanbanID) {
       kanbanData.kanbans.forEach((kanban) => {
         if (kanban.id === kanbanID) {
           kanbanData.selectedKanban = kanban;
@@ -277,10 +267,8 @@ const ItemCtrl = (function () {
     },
 
     updateKanban: function (newText, selectedKanban) {
-      // Update text at selectedKanban
       selectedKanban.text = newText;
 
-      // go through kanbans and check for match with selectedKanban.id then slice index and replace with slected.
       kanbanData.kanbans.forEach((kanban, index) => {
         if (kanban.id === selectedKanban.id) {
           kanbanData.kanbans.splice(index, 1, selectedKanban);
@@ -306,26 +294,17 @@ const ItemCtrl = (function () {
       return filtered;
     },
 
-    getSwitchItems: function (draggable, afterElement) {
-      if (!afterElement) {
-        const draggableID = parseInt(draggable.id.charAt(draggable.id.length - 1));
-        let draggableObj;
+    getSwitchItems: function (draggableID, afterElementID) {
+      let draggableObj = null;
+      let afterElementObj = null;
 
+      if (afterElementID === null) {
         kanbanData.kanbans.forEach((kanban) => {
           if (kanban.id === draggableID) {
             draggableObj = kanban;
           }
         });
-
-        return {
-          draggableObj: draggableObj,
-        };
       } else {
-        const draggableID = parseInt(draggable.id.charAt(draggable.id.length - 1));
-        const afterElementID = parseInt(afterElement.id.charAt(afterElement.id.length - 1));
-        let draggableObj = null;
-        let afterElementObj = null;
-
         kanbanData.kanbans.forEach((kanban) => {
           if (kanban.id === draggableID) {
             draggableObj = kanban;
@@ -333,16 +312,16 @@ const ItemCtrl = (function () {
             afterElementObj = kanban;
           }
         });
-
-        return {
-          draggableObj: draggableObj,
-          afterElementObj: afterElementObj,
-        };
       }
+
+      return {
+        draggableObj: draggableObj,
+        afterElementObj: afterElementObj,
+      };
     },
 
     dragSwitch: function (kanbanObj, list) {
-      if (!kanbanObj.afterElementObj || kanbanObj.afterElementObj === undefined) {
+      if (!kanbanObj.afterElementObj || kanbanObj.afterElementObj === null) {
         const draggableObj = kanbanObj.draggableObj;
 
         kanbanData.kanbans.forEach((kanban, index) => {
@@ -401,6 +380,20 @@ const UICtrl = (function () {
     form: 'form',
     kanbanText: '#text',
     addKanban: '.add-kanban',
+
+    // use .contains
+    addTask: 'add-task',
+    edit: 'edit',
+    clear: 'clear',
+    clearList: 'clear-list',
+    showMore: 'show-more',
+    addTitle: 'add-title',
+    done: 'done',
+    delete: 'delete',
+    updateTitle: 'update-title',
+    listTitle: 'list-title',
+    deleteList: 'delete-list',
+    kanbanInputEmpty: 'kanban-input_empty',
   };
 
   return {
@@ -409,13 +402,13 @@ const UICtrl = (function () {
     },
 
     populateBoard: function (lists) {
-      const kanbans = ItemCtrl.getKanbans();
+      const kanbans = KanbanCtrl.getKanbans();
       let UIlists = '';
 
       lists.forEach((list) => {
         let items = '';
         kanbans.forEach((kanban) => {
-          let parent = Number(kanban.parent.charAt(kanban.parent.length - 1));
+          let parent = App.stringSplitID(kanban.parent);
           if (parent === list.id) {
             items += `
             <div id="kanban_${kanban.id}" class="item misc_spread-md" draggable="true">
@@ -430,7 +423,7 @@ const UICtrl = (function () {
           </div>
           <i id="edit_${kanban.id}" class="material-icons col icon edit">edit</i>
           </div>
-          <form class="edit-form edit-form_${kanban.id}">
+          <form id="edit-form_${kanban.id}" class="edit-form">
           <div class="edit-grid">
             <input type="text" name="" value="${kanban.text}" id="kanban-input_${kanban.id}" class="kanban-input">                     
           </div>
@@ -468,7 +461,7 @@ const UICtrl = (function () {
         <div class="add-knbn">
           <div class="icons">
             <i id="clear-list_${list.id}" class="material-icons head-icon add">add</i>
-            <h1 class="add-task">add new task</h1>                    
+            <h1 id="add-task_${list.id}" class="add-task">add new task</h1>                    
           </div>
         </div>
       </div>
@@ -477,7 +470,7 @@ const UICtrl = (function () {
       });
 
       document.querySelector(UISelectors.board).innerHTML += UIlists;
-      App.AppMakeDraggable();
+      App.makeDraggable();
     },
 
     UIconstructList: function (newList) {
@@ -500,25 +493,14 @@ const UICtrl = (function () {
     </div>
     <div class="list-body misc_spread-sm">
       <div id="list-body_${newList.id}" class="list-body_grid">
-      <!-- <h1>Assign a Kanban</h1> -->
-      <!--  <div id="item-1" class="item misc_spread-md">
-          <div class="item-header">
-            <span id="item-color-demo" class="col" style="background: ${newList.color}"></span>
-          </div>
-          <form class="form">
-            <input type="text" name="" id="kanban-input_empty_${newList.id}" class="kanban-input kanban-input_empty">
-              <div class="char-limit_container">
-                <p id="char-limit-p_empty_${newList.id}"><span id="char-limit_empty_${newList.id}">0</span>/55</p>
-              </div> 
-          </form>
-        </div> -->
+
       </div>
     </div>
     <div class="add-knbn_container misc_spread-sm">
     <div class="add-knbn">
       <div class="icons">
         <i id="clear-list_${newList.id}" class="material-icons head-icon add">add</i>
-        <h1 class="add-task">add new task</h1>                    
+        <h1 id="add-task_${newList.id}" class="add-task">add new task</h1>                    
       </div>
     </div>
   </div>
@@ -530,7 +512,7 @@ const UICtrl = (function () {
     UIaddListTitle: function (title, id) {
       const lists = document.querySelectorAll('.list');
       lists.forEach((list) => {
-        if (parseInt(list.id.charAt(list.id.length - 1)) === id) {
+        if (App.stringSplitID(list) === id) {
           // change to split function
           list.firstElementChild.firstElementChild.remove();
           const h1 = document.createElement('h1');
@@ -545,9 +527,14 @@ const UICtrl = (function () {
       });
     },
 
+    updateListTitle: function (newTitle, listID) {
+      const title = document.querySelector(`#list-title_${listID}`);
+      title.textContent = newTitle;
+    },
+
     UIconstructEmptyKanban: function (correspColor, id) {
       const kanban = document.createElement('div');
-      kanban.id = `kanban-empty`;
+      kanban.id = `kanban_empty`;
       kanban.className = 'item misc_spread-md';
       kanban.innerHTML = `
       <div class="item-header">
@@ -566,9 +553,9 @@ const UICtrl = (function () {
 
     UIconstructKanban: function (demoParent, kanbanObj) {
       demoParent.remove();
-      // ItemCtrl.removeSelectedKanban();
+
       const kanban = document.createElement('div');
-      kanban.id = `kanban-${kanbanObj.id}`;
+      kanban.id = `kanban_${kanbanObj.id}`;
       kanban.className = 'item misc_spread-md';
       kanban.setAttribute('draggable', 'true');
       kanban.innerHTML = `
@@ -583,7 +570,7 @@ const UICtrl = (function () {
       </div>
       <i id="edit_${kanbanObj.id}" class="material-icons col icon edit">edit</i>
       </div>
-      <form class="edit-form edit-form_${kanbanObj.id}">
+      <form id="edit-form_${kanbanObj.id}" class="edit-form">
       <div class="edit-grid">
         <input type="text" name="" value="${kanbanObj.text}" id="kanban-input_${kanbanObj.id}" class="kanban-input">                     
       </div>
@@ -606,7 +593,7 @@ const UICtrl = (function () {
       // Hide pen when in edit state
       document.querySelector(`#edit_${id}`).style.display = 'none';
       document.querySelector(`#kanban-text_${id}`).style.display = 'none';
-      document.querySelector(`.edit-form_${id}`).style.display = 'block';
+      document.querySelector(`#edit-form_${id}`).style.display = 'block';
     },
 
     UIleaveEditState: function (id) {
@@ -616,7 +603,7 @@ const UICtrl = (function () {
       // Show pen when not in edit state
       document.querySelector(`#edit_${id}`).style.display = 'block';
       document.querySelector(`#kanban-text_${id}`).style.display = 'block';
-      document.querySelector(`.edit-form_${id}`).style.display = 'none';
+      document.querySelector(`#edit-form_${id}`).style.display = 'none';
     },
 
     UIupdateKanban: function (kanban, newKanban) {
@@ -632,7 +619,7 @@ const UICtrl = (function () {
       </div>
     <i id="edit_${newKanban.id}" class="material-icons col icon edit">edit</i>
     </div>
-    <form class="edit-form edit-form_${newKanban.id}">
+    <form id="edit-form_${newKanban.id}" class="edit-form">
     <div class="edit-grid">
       <input type="text" name="" value="${newKanban.text}" id="kanban-input_${newKanban.id}" class="kanban-input">                      
     </div>
@@ -645,7 +632,7 @@ const UICtrl = (function () {
     </div>
       `;
 
-      ItemCtrl.removeSelectedKanban();
+      KanbanCtrl.removeSelectedKanban();
     },
 
     UIdeleteKanban: function (kanban) {
@@ -670,7 +657,7 @@ const UICtrl = (function () {
 
 // App Controller
 
-const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
+const App = (function (ListCtrl, KanbanCtrl, UICtrl, StorageCtrl) {
   // Get selectors
   const selectors = UICtrl.getSelectors();
 
@@ -685,56 +672,52 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
       form.addEventListener('submit', createKanban);
     });
 
-    // purpose: prevent from reassigning every event listener when new elements is being created.
     document.querySelector(selectors.board).addEventListener('click', determine);
   };
 
-  //? Add edit state buttons
-  //? Add event listeners for those buttons, both finished and back button
-
   const determine = function (e) {
     const id = stringSplitID(e.target);
-    const isKanbanInProgress = ItemCtrl.getKanbanInProgress();
+    const isKanbanInProgress = KanbanCtrl.getKanbanInProgress();
     const cls = e.target.classList;
 
     switch (true) {
-      case cls.contains('add-task'):
+      case cls.contains(selectors.addTask):
         if (isKanbanInProgress === false) {
-          constructEmptyKanban(e);
+          constructEmptyKanban(e, id);
         }
         break;
-      case cls.contains('edit'):
+      case cls.contains(selectors.edit):
         enterEditState(e, id);
         getElForLimit(e, id);
         break;
-      case cls.contains('clear'):
+      case cls.contains(selectors.clear):
         leaveEditState(id);
         break;
-      case cls.contains('clear-list'):
+      case cls.contains(selectors.clearList):
         clearAllKanbans(id);
         break;
-      case cls.contains('show-more'):
+      case cls.contains(selectors.showMore):
         toggleListCtas(e);
         break;
-      case cls.contains('add-title'):
+      case cls.contains(selectors.addTitle):
         addListTitle(e, id);
         break;
-      case cls.contains('done'):
-        updateKanban(e);
+      case cls.contains(selectors.done):
+        updateKanban(e, id);
         break;
-      case cls.contains('delete'):
-        deleteKanban(e);
+      case cls.contains(selectors.delete):
+        deleteKanban(e, id);
         break;
-      case cls.contains('update-title'):
-        updateListTitle(e);
+      case cls.contains(selectors.updateTitle):
+        updateListTitle(e, id);
         break;
-      case cls.contains('list-title'):
+      case cls.contains(selectors.listTitle):
         initListTitle(e, id);
         break;
-      case cls.contains('delete-list'):
+      case cls.contains(selectors.deleteList):
         deleteList(id);
         break;
-      case cls.contains('kanban-input_empty'):
+      case cls.contains(selectors.kanbanInputEmpty):
         getEmptyElForLimit(e, id);
         break;
 
@@ -746,20 +729,21 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
   };
 
   /* 
-  Each dynamically added item and list has unique number added onto to their id.
-  The function below extracts that number by splitting the str at '_' and use regex to find it and proceeds to turn it in to a string using .join method.
+  Each dynamically added elements has an unique number added on to their id.
+  By using regex, I could extract that number by splitting the string at '_', filter through it and check which item contains digits. 
   */
   const stringSplitID = function (target) {
-    const regex = /\D/g;
-    const ID = target.id
+    target = typeof target === 'string' ? target : target.id;
+    const regex = /\d+/g;
+    const ID = target
       .split('_')
-      .filter((str) => !regex.test(str))
+      .filter((str) => str.match(regex))
       .join('');
     return parseInt(ID);
   };
 
+  // Generate a light color for each list
   const constructListColor = function () {
-    // Generate a light color for each list
     const symLet = [...'abcdef'];
     let color = `#`;
     for (let i = 0; i < 4; i++) {
@@ -769,42 +753,41 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
   };
 
   const createList = function () {
-    const selectedKanban = ItemCtrl.getSelectedKanban();
+    const selectedKanban = KanbanCtrl.getSelectedKanban();
     const lists = StorageCtrl.getListsFromStorage();
     const listLimit = 4;
 
-    if(lists.length === listLimit) {
-      console.log('list limit reached, please remove a list before creating a new one.')
-      // throwMessage('list limit reached, please remove a list before creating a new one.', 'error');
+    if (lists.length === listLimit) {
+      alert('list limit reached, please remove a list before creating a new one.')
     } else {
       if (selectedKanban !== null) {
         isInEditState();
       }
       const color = constructListColor();
       const newList = ListCtrl.constructList(color);
-      // Add list to LS
+
       StorageCtrl.storeList(newList);
       UICtrl.UIconstructList(newList);
-      // re-assign event listeners to newly createn items.
+
       loadEventListeners();
-    };
+    }
   };
 
-    const addListTitle = function (e, id) {
-      document.querySelector(`#${e.target.id}`).addEventListener('keypress', (e) => {
-        if (e.keycode === 13 || e.which === 13) {
-          const target = e.target;
-          const value = toUpperCase(target.value);
-          const title = value.length >= 1 ? value : `List-${id}`;
-          ListCtrl.addListTitle(title, id);
-          // Add title to list - LS
-          StorageCtrl.storeListTitle(title, id);
-          UICtrl.UIaddListTitle(title, id);
-          // initListTitle(id);
-          e.preventDefault();
-        }
-      });      
-    }
+  const addListTitle = function (e, id) {
+    document.querySelector(`#${e.target.id}`).addEventListener('keypress', (e) => {
+      if (e.keycode === 13 || e.which === 13) {
+        const target = e.target;
+        const value = toUpperCase(target.value);
+        const title = value.length >= 1 ? value : `List-${id}`;
+
+        ListCtrl.addListTitle(title, id);
+        StorageCtrl.storeListTitle(title, id);
+        UICtrl.UIaddListTitle(title, id);
+
+        e.preventDefault();
+      }
+    });
+  };
 
   const deleteList = function (id) {
     ListCtrl.deleteList(id);
@@ -816,7 +799,7 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
   };
 
   const clearAllKanbans = function (id) {
-    ItemCtrl.ICclearAllKanbans(id);
+    KanbanCtrl.ICclearAllKanbans(id);
     StorageCtrl.SCclearAllKanbans(id);
     UICtrl.UCclearAllKanbans(id);
   };
@@ -860,24 +843,23 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
     done.style.display = 'none';
   };
 
-  const updateListTitle = function (e) {
-    const list = e.target.parentNode.parentNode;
+  const updateListTitle = function (e, id) {
     const newValue = toUpperCase(e.target.parentNode.firstElementChild.textContent);
-    const newTitle = newValue.length >= 1 ? newValue : `List-${stringSplitID(list)}`;
-    ListCtrl.updateListTitle(list, newTitle);
-    // Update list title - LS
-    StorageCtrl.updateListTitle(list, newTitle);
+    const newTitle = newValue.length >= 1 ? newValue : `List-${id}`;
+
+    ListCtrl.updateListTitle(newTitle, id);
+    UICtrl.updateListTitle(newTitle, id);
+    StorageCtrl.updateListTitle(newTitle, id);
+
     leaveUpdateTitleState(e);
   };
 
-  const constructEmptyKanban = function (e) {
+  const constructEmptyKanban = function (e, id) {
     // Declare that there's an empty kanban about to be constructed.
-    ItemCtrl.setKanbanInProgress(true);
+    KanbanCtrl.setKanbanInProgress(true);
 
-    const list = e.target.parentNode.parentNode.parentNode.parentNode;
-    const ID = stringSplitID(list);
-    const listColor = ListCtrl.getListColor(list);
-    UICtrl.UIconstructEmptyKanban(listColor, ID);
+    const listColor = ListCtrl.getListColor(id);
+    UICtrl.UIconstructEmptyKanban(listColor, id);
     // re-assign event listeners to newly createn items.
     loadEventListeners();
   };
@@ -886,10 +868,10 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
     const kanbanText = e.target.firstElementChild.value;
     const listParent = e.target.parentNode;
     const listParentId = listParent.parentNode.id;
-    const correspList = e.target.parentNode.parentNode;
-    const correspColor = ListCtrl.getListColor(correspList);
+    const correspListID = stringSplitID(e.target.parentNode.parentNode);
+    const correspColor = ListCtrl.getListColor(correspListID);
     // Construct Kanban object
-    const kanban = ItemCtrl.constructKanban(kanbanText, listParentId, correspColor);
+    const kanban = KanbanCtrl.constructKanban(kanbanText, listParentId, correspColor);
     // Add kanban to LS
     StorageCtrl.storeKanban(kanban);
     // Construct UI Kanban
@@ -897,7 +879,7 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
     makeDraggable();
 
     // Declare that there's no longer an empty kanban about to be constructed.
-    ItemCtrl.setKanbanInProgress(false);
+    KanbanCtrl.setKanbanInProgress(false);
     e.preventDefault();
   };
 
@@ -929,7 +911,6 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
     const limitSpan = elements.limitSpan;
     let value = elements.value;
 
-    // Check length of value to determine color
     let color = value.length === 55 ? '#E59494' : value.length < 30 ? '#DBDBDB' : '#E5C994';
     limitP.style.color = color;
 
@@ -960,7 +941,7 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
   };
 
   const makeDraggable = function () {
-    // global variables hack
+    // global variables
     let vars = {};
 
     const draggables = document.querySelectorAll('.item');
@@ -972,18 +953,16 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
       });
 
       draggable.addEventListener('dragend', () => {
-        // const list = document.querySelector('.dragging').parentNode; //? maybe cannot read parentNode of null because the kanban with it's functions are dynamically loaded and can't read it until reload page?
         const list = draggable.parentNode;
         draggable.classList.remove('dragging');
-        const positionUpdate = ItemCtrl.dragSwitch(vars.kanbanObj, list);
-        // Update kanban position - LS
+        const positionUpdate = KanbanCtrl.dragSwitch(vars.kanbanObj, list);
         StorageCtrl.dragSwitch(positionUpdate);
 
         // Make sure there's no duplicate kanbans
-        const kanbans = ItemCtrl.removeDuplicate();
+        const kanbans = KanbanCtrl.removeDuplicate();
         // Make sure there's no duplicate kanbans - LS
         StorageCtrl.removeDuplicate(kanbans);
-        const kanbanData = ItemCtrl.getKanbanData();
+        const kanbanData = KanbanCtrl.getKanbanData();
         kanbanData.kanbans = kanbans;
       });
     });
@@ -993,13 +972,21 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
         e.preventDefault();
         vars.afterElement = getDragAfterElement(list, e.clientY);
         const draggable = document.querySelector('.dragging');
-        if (vars.afterElement === null || vars.afterElement === undefined) {
-          list.children[1].firstElementChild.appendChild(draggable);
-          vars.kanbanObj = ItemCtrl.getSwitchItems(draggable, vars.afterElement);
-        } else {
-          list.children[1].firstElementChild.insertBefore(draggable, vars.afterElement);
+        let draggableID = null;
+        let afterElementID = null;
 
-          vars.kanbanObj = ItemCtrl.getSwitchItems(draggable, vars.afterElement);
+        if (vars.afterElement === null || vars.afterElement === undefined) {
+          draggableID = stringSplitID(draggable.id);
+          afterElementID = null;
+
+          vars.kanbanObj = KanbanCtrl.getSwitchItems(draggableID, afterElementID);
+          list.children[1].firstElementChild.appendChild(draggable);
+        } else {
+          draggableID = stringSplitID(draggable.id);
+          afterElementID = stringSplitID(vars.afterElement.id);
+
+          vars.kanbanObj = KanbanCtrl.getSwitchItems(draggableID, afterElementID);
+          list.children[1].firstElementChild.insertBefore(draggable, vars.afterElement);
         }
       });
     });
@@ -1023,21 +1010,19 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
   };
 
   const enterEditState = function (e, id) {
-    let selectedKanban = ItemCtrl.getSelectedKanban();
+    let selectedKanban = KanbanCtrl.getSelectedKanban();
     if (selectedKanban === null) {
       const form = e.target.parentNode.nextSibling.nextSibling;
       const kanban = form.parentNode;
-      const selected = ItemCtrl.setSelectedKanban(kanban);
+      const selected = KanbanCtrl.setSelectedKanban(id);
       UICtrl.UIenterEditState(id);
 
       // Submit on enter (hacky fallback for done button)
       document.querySelector(`#${e.target.parentNode.parentNode.id}`).addEventListener('keypress', (e) => {
         if (e.keycode === 13 || e.which === 13) {
           const newText = form.firstElementChild.firstElementChild.value;
-          const selected = ItemCtrl.setSelectedKanban(kanban);
-          const updatedKanban = ItemCtrl.updateKanban(newText, selected);
+          const updatedKanban = KanbanCtrl.updateKanban(newText, selected);
           UICtrl.UIupdateKanban(kanban, updatedKanban);
-          // Update kanban - LS
           StorageCtrl.updateKanban(updatedKanban);
 
           e.preventDefault();
@@ -1047,30 +1032,28 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
   };
 
   const leaveEditState = function (id) {
-    ItemCtrl.removeSelectedKanban();
+    KanbanCtrl.removeSelectedKanban();
     if (id !== undefined) {
       UICtrl.UIleaveEditState(id);
     }
   };
 
-  const updateKanban = function (e) {
+  const updateKanban = function (e, id) {
     const form = e.target.parentNode.parentNode.parentNode.nextSibling.nextSibling;
     const newText = form.firstElementChild.firstElementChild.value;
     const kanban = form.parentNode;
-    const selected = ItemCtrl.setSelectedKanban(kanban);
-    const updatedKanban = ItemCtrl.updateKanban(newText, selected);
+    const selected = KanbanCtrl.setSelectedKanban(id);
+    const updatedKanban = KanbanCtrl.updateKanban(newText, selected);
     UICtrl.UIupdateKanban(kanban, updatedKanban);
-    // Update kanban - LS
     StorageCtrl.updateKanban(updatedKanban);
     e.preventDefault();
   };
 
-  const deleteKanban = function (e) {
+  const deleteKanban = function (e, id) {
     const kanban = e.target.parentNode.parentNode.parentNode.parentNode;
     UICtrl.UIdeleteKanban(kanban);
-    // Delete kanban - LS
-    StorageCtrl.deleteKanbanFromStorage(kanban);
-    ItemCtrl.deleteKanban(kanban);
+    StorageCtrl.deleteKanbanFromStorage(id);
+    KanbanCtrl.deleteKanban(kanban);
     leaveEditState();
   };
 
@@ -1078,11 +1061,11 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
     const editForms = document.querySelectorAll('.edit-form');
     editForms.forEach((form) => {
       if (form.style.display != 'none') {
-        let id = form.classList[1].charAt(form.classList[1].length - 1);
+        let id = stringSplitID(form);
         UICtrl.UIleaveEditState(id);
       }
     });
-    ItemCtrl.removeSelectedKanban();
+    KanbanCtrl.removeSelectedKanban();
   };
 
   const toUpperCase = function (string) {
@@ -1101,18 +1084,18 @@ const App = (function (ListCtrl, ItemCtrl, UICtrl, StorageCtrl) {
       loadEventListeners();
     },
 
-    AppMakeDraggable: function () {
+    makeDraggable: function () {
       return makeDraggable();
     },
 
-    AppStringSplitID: function () {
-      return stringSplitID();
+    stringSplitID: function (element) {
+      return stringSplitID(element);
     },
 
-    AppToUpperCase: function (string) {
+    toUpperCase: function (string) {
       return toUpperCase(string);
     },
   };
-})(ListCtrl, ItemCtrl, UICtrl, StorageCtrl);
+})(ListCtrl, KanbanCtrl, UICtrl, StorageCtrl);
 
 App.init();

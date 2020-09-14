@@ -480,6 +480,9 @@ body {
 @media only screen  
 and (max-device-width : 1024px) {
   .container {
+    width: 100%;
+    height: 100%;
+    
     .kanban-container {
       width: max-content;
       height: max-content;
