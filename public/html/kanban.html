@@ -3,80 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="description" content="An agile project management tool designed to help visualize work, limit work-in-progress, and maximize efficiency">
     <title>Kanban Board</title>
+    <link rel="stylesheet" href="../css/styles.css" />
+    <!--  MATERIAL ICONS -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
   </head>
-  <link rel="stylesheet" href="../css/styles.css" />
-  <!--  MATERIAL ICONS -->
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
   <body>
     <div class="container">
       <div class="kanban-container">
         <div class="kanban-structure">
-          <div class="board">
-            <!-- DEMO LISTS BEGIN -->
-
-            <!-- <div class="list">
-              <div class="list-header misc_spread-sm">
-                <input type="text" name="" id="add-title" class="add-title" placeholder="Add title" />
-                
-                <div class="open-head_container" style="display: none;">
-                  <div class="head-icons">
-                    <i id="delete-list_${newList.id}" class="material-icons head-icon delete-list">delete</i>       
-                    <i id="clear-list_${newList.id}" class="material-icons head-icon clear-list">clear_all</i>       
-                  </div>
-                </div>
-
-                <i class="material-icons add-kanban">more_horiz</i>
-              </div>
-              <div class="list-body misc_spread-sm">
-                <div id="list-body" class="list-body_grid">
-                  <div id="kanban" class="item misc_spread-md" draggable="true">
-                    <div class="item-header">
-                    <span id="item-color" class="col"></span>
-                    <div id="open-edit_container" class="open-edit_container" style="display: block;">
-                    <div class="open-edit">
-                      <i id="delete" class="material-icons col icon delete">delete</i>
-                      <i id="done" class="material-icons col icon done">done</i>
-                      <i id="clear" class="material-icons col icon clear">clear</i>  
-                    </div>
-                  </div>
-                  <i id="edit" class="material-icons col icon edit" style="display: none;">edit</i>
-                  </div>
-                    <form class="edit-form edit-form" style="display: block;">
-                    <div class="edit-grid">
-                      <input type="text" name="" id="kanban-input" class="kanban-input">                     
-                    </div>
-                    <div class="char-limit_container">
-                      <p><span id="char-limit">0</span>/60</p>
-                    </div>  
-                  </form>
-            
-
-                  <div id="kanban-text" class="item-text" style="display: none;">
-                    <p id="text" class="kanban-text">Lorem ipsum dolor sit amet consectetur.</p>
-                  </div>
-                  </div>
-                </div>
-              </div>
-              <div class="add-knbn_container misc_spread-sm">
-                <div class="add-knbn">
-                  <div class="icons">
-                    <i id="clear-list_${newList.id}" class="material-icons head-icon add">add</i>
-                    <h1 class="add-task">add new task</h1>                    
-                  </div>
-                </div>
-              </div>
-            </div> -->
-            <!-- DEMO LISTS END -->
-          </div>
+          <div class="board"></div>
           <div class="buttons-container">
             <div class="buttons cta">
               <button id="add" class="button"><i class="material-icons btn-icon">add</i></button>
-              <!-- <button id="toggle-edit" class="button"><i class="material-icons btn-icon_separate">edit</i></button>
-              <button id="toggle-remove" class="button"><i class="material-icons btn-icon">remove</i></button> -->
             </div>
           </div>
         </div>
+      </div>
+    </div>
+    <div class="notify-user">
+      <div class="notify-user_content">
+        <h1>This application is only suitable for desktop browsers.</h1>
       </div>
     </div>
     <script src="https://unpkg.com/animate-css-grid@1.4.0/dist/main.js"></script>

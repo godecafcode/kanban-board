@@ -3,12 +3,12 @@
 
 // SCSS colors
 $standard-white: #ffffff;
-$kanban-background: #F5F5F5;
-$kanban-header: #EAEAEA;
-$kanban-blue: #94BCE5;
-$kanban-green: #94E5B3;
-$kanban-btn-yellow: #E5C994;
-$kanban-btn-red: #E59494;
+$kanban-background: #f5f5f5;
+$kanban-header: #eaeaea;
+$kanban-blue: #94bce5;
+$kanban-green: #94e5b3;
+$kanban-btn-yellow: #e5c994;
+$kanban-btn-red: #e59494;
 $kanban-text: #333333;
 $primary-text-blue: #042330;
 
@@ -33,7 +33,10 @@ input[type='submit']:focus,
   font-family: $primary-font;
 }
 
-h1, h2, h3, p {
+h1,
+h2,
+h3,
+p {
   font-family: $primary-font;
 }
 
@@ -51,11 +54,10 @@ body {
   padding: 0;
   text-decoration: none;
   list-style: none;
-
-  -webkit-user-select: none;  /* Chrome all / Safari all */
-  -moz-user-select: none;     /* Firefox all */
-  -ms-user-select: none;      /* IE 10+ */
-  user-select: none;          /* Likely future */     
+  -webkit-user-select: none; /* Chrome all / Safari all */
+  -moz-user-select: none; /* Firefox all */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Likely future */
 }
 
 .container {
@@ -68,12 +70,11 @@ body {
 
   .kanban-container {
     width: 80%;
-    height: 60%;
-    // background-color: rgb(205, 205, 205);
+    height: max-content;
 
     .kanban-structure {
       width: 100%;
-      height: 100%;
+      height: max-content;
       display: grid;
       grid-template-columns: auto 10%;
       grid-template-rows: auto;
@@ -81,7 +82,6 @@ body {
       .board {
         display: grid;
         grid-template-columns: repeat(auto-fill, 400px);
-        grid-auto-rows: repeat(auto-fill, 100px);
         align-content: center;
         justify-content: center;
 
@@ -91,14 +91,12 @@ body {
           border-radius: 5px;
           background-color: #fff;
           box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.164);
-          // overflow: hidden;
           display: grid;
-          // position: relative;
           justify-self: center;
           grid-template-columns: 1fr;
           grid-template-rows: 45px auto;
           margin: 0.5rem 0 0.5rem 0;
-          
+
           .list-header {
             width: 100%;
             height: 100%;
@@ -107,12 +105,11 @@ body {
             border-radius: 5px 5px 0px 0px;
             border-bottom: 1px solid #eee;
             background: $kanban-header;
-            
 
             #svg-icon {
               filter: invert(59%) sepia(41%) saturate(0%) hue-rotate(282deg) brightness(106%) contrast(86%);
             }
-            
+
             .head-icons {
               display: flex;
               place-self: center;
@@ -126,7 +123,6 @@ body {
               color: #808080;
               font-size: 18px;
               margin-right: auto;
-              // margin-left: 15px;
             }
 
             i {
@@ -166,7 +162,6 @@ body {
             .add-kanban {
               cursor: pointer;
             }
-
           }
 
           .list-body {
@@ -175,22 +170,16 @@ body {
             max-height: max-content;
             display: flex;
             overflow-y: scroll;
-            
-            // margin-bottom: 10px;
-            // place-items: center;
-
 
             .list-body_grid {
               width: 100%;
               min-height: 105px;
-              // height: max-content;
               max-height: 425px;
               display: grid;
               grid-template-columns: 1fr;
               grid-template-rows: repeat(auto-fit, 95px);
               gap: 10px;
               padding-top: 10px;
-              
 
               .item {
                 width: 100%;
@@ -199,10 +188,8 @@ body {
                 grid-template-columns: auto;
                 grid-template-rows: 40px 45px;
                 border-radius: 5px;
-                // cursor: move;
-                background: #FCFCFC;
+                background: #fcfcfc;
                 border: 1px solid #eeeeee;
-                
 
                 .item-header {
                   height: 100%;
@@ -218,7 +205,6 @@ body {
                     width: 60px;
                     height: 9px;
                     border-radius: 5px;
-                    // border: 1px solid rgb(255, 255, 255);
                     background: $kanban-blue;
                     margin-right: auto;
                   }
@@ -238,9 +224,8 @@ body {
                     }
                   }
 
-
                   .icon {
-                    color: #DBDBDB;
+                    color: #dbdbdb;
                     cursor: pointer;
                   }
                   .icon:hover {
@@ -251,7 +236,7 @@ body {
 
                 .edit-form {
                   display: none;
-                  position: relative; 
+                  position: relative;
                 }
 
                 .item-text {
@@ -264,10 +249,8 @@ body {
                     padding-left: 5px;
                   }
                   .kanban-text {
-                    overflow-wrap: anywhere; 
+                    overflow-wrap: anywhere;
                   }
-
-
                 }
 
                 form {
@@ -275,7 +258,7 @@ body {
                     display: grid;
                     grid-template-columns: auto 40px 40px;
                     align-items: center;
-                    position: relative; 
+                    position: relative;
 
                     button {
                       width: 25px;
@@ -294,7 +277,7 @@ body {
                     }
 
                     .check {
-                      background: #94E5B3;
+                      background: #94e5b3;
                       border-radius: 5px;
                     }
                     .check:focus {
@@ -319,19 +302,12 @@ body {
                     height: 18px;
                   }
 
-                  
                   .kanban-input:focus {
                     outline: none;
                   }
                 }
-
-                
-
-              }      
-                      
+              }
             }
-
-
           }
 
           .list-body::-webkit-scrollbar {
@@ -349,7 +325,6 @@ body {
               height: 35px;
               display: flex;
               align-items: flex-end;
-              
 
               .icons {
                 display: flex;
@@ -367,18 +342,7 @@ body {
               }
             }
           }
-
-
-
-          
         }
-        // .insert-item{
-        //   insert: "<i class="material-icons">add_circle_outline</i>";
-        //   display: block;
-        //   position: absolute;
-        //   bottom: -15px;
-        //   left: 175px;
-        // }
       }
 
       .buttons-container {
@@ -431,16 +395,8 @@ body {
           }
         }
       }
-    }    
+    }
   }
-
-  // .misc_spread-hd {
-  //   padding-left: 1.5rem;
-  //   padding-right: 1.5rem;
-  //   box-sizing: border-box;
-  //   margin-left: auto;
-  //   margin-right: auto;   
-  // }
 
   .misc_spread-sm {
     padding-left: 0.5rem;
@@ -457,32 +413,31 @@ body {
     margin-left: auto;
     margin-right: auto;
   }
-
 }
 
 .form {
   position: relative;
 }
 
-   
-  
-  .char-limit_container {
-    position: absolute;
-    right: 0;
-    p {
-      color: #DBDBDB; // beginning
-      // color: $kanban-btn-yellow; // when close to limit
-      // color: $kanban-btn-red; // when limit hit 
-      font-size: 14px;
-    }
+.char-limit_container {
+  position: absolute;
+  right: 0;
+  p {
+    color: #dbdbdb;
+    font-size: 14px;
   }
+}
 
-@media only screen  
-and (max-device-width : 1024px) {
+.notify-user {
+  display: none;
+}
+
+@media only screen and (max-device-width: 1111px) {
   .container {
+    display: none;
     width: 100%;
     height: 100%;
-    
+
     .kanban-container {
       width: max-content;
       height: max-content;
@@ -493,7 +448,7 @@ and (max-device-width : 1024px) {
         display: grid;
         grid-template-columns: auto;
         grid-template-rows: auto auto;
-        
+
         .buttons-container {
           padding: 25px;
 
@@ -502,13 +457,24 @@ and (max-device-width : 1024px) {
           }
         }
       }
-    }    
+    }
   }
+  .notify-user {
+    display: block;
+    width: 100vw;
+    height: 100vh;
 
+    .notify-user_content {
+      height: 100%;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
-
-}
-
-.dragging {
-  
+      h1 {
+        color: #b8b8b8;
+        text-align: center;
+      }
+    }
+  }
 }
